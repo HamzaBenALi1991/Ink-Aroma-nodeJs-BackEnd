@@ -18,7 +18,7 @@ router.get("/users", async (req, res) => {
 // get user by Id
 router.get("/user/:id", async (req, res) => {
   try {
-    const user = await User.findById(req.params.id);
+    const user = await User.findById(req.params.id).populate('favoritbooks reviews');
     if (user) { // checking if the Id is valid 
       res.json({
         user: user,
@@ -87,5 +87,90 @@ router.delete("/user/:id" , async (req, res) => {
       res.status(500).json({ message: "Internal server error!" });
     }
   });
+
+// affect a favour book 
+router.put("/affect-book/:iduser/:idbook", async (req, res) => {
+  try {
+    const user = await User.findByIdAndUpdate(
+      req.params.iduser,
+      { $push: { favoritbooks: req.params.idbook } },
+      {
+        new: true,
+      }
+    );
+    res.json(user);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Internal server error!" });
+  }
+});
+
+// desafecte todo from user
+router.put("/desaffect-book/:iduser/:idbook", async (req, res) => {
+  try {
+    const user = await User.findByIdAndUpdate(
+      req.params.iduser,
+      { $pull: { favoritbooks: req.params.idbook } },
+      {
+        new: true,
+      }
+    );
+    res.json(user);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Internal server error!" });
+  }
+});   
+// affect a review 
+router.put("/affect-reviewtouser/:iduser/:idreview", async (req, res) => {
+  try {
+    const user = await User.findByIdAndUpdate(
+      req.params.iduser,
+      { $push: { reviews: req.params.idreview } },
+      {
+        new: true,
+      }
+    );
+    res.json(user);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Internal server error!" });
+  }
+});
+// remove review 
+router.put("/desaffect-reviewtouser/:iduser/:idreview", async (req, res) => {
+  try {
+    const user = await User.findByIdAndUpdate(
+      req.params.iduser,
+      { $pull: { reviews: req.params.idreview } },
+      {
+        new: true,
+      }
+    );
+    res.json(user);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Internal server error!" });
+  }
+});  
+// added book api 
+router.put("/user/newbook/:iduser/:idbook", async (req, res) => {
+  try {
+    const user = await User.findByIdAndUpdate(
+      req.params.iduser,
+      { $push: { addedbooks: req.params.idbook } },
+      {
+        new: true,
+      }
+    );
+    res.json(user);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Internal server error!" });
+  }
+});
+
+
+
 
 module.exports = router;

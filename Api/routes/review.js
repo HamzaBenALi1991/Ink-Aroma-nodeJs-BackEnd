@@ -5,7 +5,7 @@ const Reviews = require("../models/review");
 // get all reviews
 router.get("/reviews", async (req, res) => {
   try {
-    const reviews = await Reviews.find({});
+    const reviews = await Reviews.find({}).populate("user book");
     res.status(200).json({
       reviews: reviews,
     });
@@ -69,7 +69,7 @@ router.put("/review/:id", async (req, res) => {
   });
   router.get("/review/:id", async (req, res) => {
     try {
-      const review = await Reviews.findById(req.params.id);
+      const review = await Reviews.findById(req.params.id).populate("user book");
       if (review) {
         // checking if the Id is valid
         res.json({
@@ -88,4 +88,5 @@ router.put("/review/:id", async (req, res) => {
       });
     }
   });
+  
 module.exports = router;

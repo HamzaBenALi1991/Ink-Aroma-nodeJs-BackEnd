@@ -18,7 +18,7 @@ router.get("/books", async (req, res) => {
 // get Book by Id
 router.get("/book/:id", async (req, res) => {
   try {
-    const book = await Book.findById(req.params.id);
+    const book = await Book.findById(req.params.id).populate('reviews');
     if (book) {
       // checking if the Id is valid
       res.json({
@@ -90,5 +90,37 @@ router.delete("/book/:id", async (req, res) => {
     res.status(500).json({ message: "Internal server error!" });
   }
 });
+// affect a review 
+router.put("/affect-review/:idbook/:idreview", async (req, res) => {
+  try {
+    const book = await Book.findByIdAndUpdate(
+      req.params.idbook,
+      { $push: { reviews: req.params.idreview } },
+      {
+        new: true,
+      }
+    );
+    res.json(book);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Internal server error!" });
+  }
+});
+// remove review 
+router.put("/desaffect-review/:idbook/:idreview", async (req, res) => {
+  try {
+    const book = await Book.findByIdAndUpdate(
+      req.params.idbook,
+      { $pull: { reviews: req.params.idreview } },
+      {
+        new: true,
+      }
+    );
+    res.json(book);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Internal server error!" });
+  }
+});  
 
 module.exports = router;

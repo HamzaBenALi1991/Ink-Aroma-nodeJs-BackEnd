@@ -23,6 +23,9 @@ const userSchema = new Schema(
     image: String,
     favoritbooks: [{ type: mongoose.Schema.Types.ObjectId, ref: "Book" }],
     reviews: [{ type: mongoose.Schema.Types.ObjectId, ref: "Review" }],
+    addedbooks: [{ type: mongoose.Schema.Types.ObjectId, ref: "Book" }],
+    image : String
+
   },
   { versionKey: false, timestamps: true }
 );
