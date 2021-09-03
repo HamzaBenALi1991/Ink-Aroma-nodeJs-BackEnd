@@ -6,7 +6,7 @@ const bodyparser = require("body-parser");
 const mongoose =require('mongoose')
 
 // importing routes
-const UserRoutes = require("./api /routes/user");
+const UserRoutes = require("./Api/routes/user");
 
 
 // stting up mongoose connect 
