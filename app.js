@@ -7,6 +7,8 @@ const mongoose =require('mongoose')
 
 // importing routes
 const UserRoutes = require("./Api/routes/user");
+const BookRoutes =require('./Api/routes/book');
+const ReviewRoutes =require('./Api/routes/review')
 
 
 // stting up mongoose connect 
@@ -57,6 +59,8 @@ app.use((req, res, next) => {
 
 // routes that handls requests
 app.use("/", UserRoutes);
+app.use('/',BookRoutes); 
+app.use('/',ReviewRoutes) 
 
 // handlying all wrong routes  :
 

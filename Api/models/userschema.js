@@ -21,8 +21,8 @@ const userSchema = new Schema(
     city: String,
     phone: Number,
     image: String,
-    favoritbooks: [],
-    reviews: [],
+    favoritbooks: [{ type: mongoose.Schema.Types.ObjectId, ref: "Book" }],
+    reviews: [{ type: mongoose.Schema.Types.ObjectId, ref: "Review" }],
   },
   { versionKey: false, timestamps: true }
 );
