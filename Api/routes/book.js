@@ -110,21 +110,21 @@ router.put("/book/:id", upload.single("bookCover"), async (req, res) => {
   try {
     const oldbook = await Book.findById(req.params.id);
 
-    const book = await Book.findByIdAndUpdate(
-      req.params.id,
-      {
-        title: req.body.title,
-        author: req.body.author,
-        description: req.body.description,
-        reviews: req.body.reviews,
-        bookScore: req.body.bookScore,
-        bookCover: req.file.path,
-      },
-      {
-        new: true,
-      }
-    );
-    if (book) {
+    if (oldbook && req.file) {
+      const book = await Book.findByIdAndUpdate(
+        req.params.id,
+        {
+          title: req.body.title,
+          author: req.body.author,
+          description: req.body.description,
+          reviews: req.body.reviews,
+          bookScore: req.body.bookScore,
+          bookCover: req.file.path,
+        },
+        {
+          new: true,
+        }
+      );
       try {
         // this is for removing old image after updating book image
         fs.unlinkSync(oldbook.bookCover);
@@ -133,6 +133,24 @@ router.put("/book/:id", upload.single("bookCover"), async (req, res) => {
         console.error(err);
       }
       // checking if the book already exist or not
+      res.json({
+        message: "book has been updated .",
+        newBookInfos: book,
+      });
+    } else if (oldbook && req.file == undefined) {
+      const book = await Book.findByIdAndUpdate(
+        req.params.id,
+        {
+          title: req.body.title,
+          author: req.body.author,
+          description: req.body.description,
+          reviews: req.body.reviews,
+          bookScore: req.body.bookScore,
+        },
+        {
+          new: true,
+        }
+      );
       res.json({
         message: "book has been updated .",
         newBookInfos: book,
