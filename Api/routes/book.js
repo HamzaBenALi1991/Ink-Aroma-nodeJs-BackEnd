@@ -1,7 +1,41 @@
 const express = require("express");
+const { now } = require("mongoose");
 const router = express.Router();
+const multer = require("multer");
+const path = require("path");
+const fs = require("fs");
+// multer configuration
+const my_storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    // where images will be stored
+    cb(null, "./uploads/books/");
+  },
 
-const Book =require('../models/bookSchema')
+  filename: (req, file, cb) => {
+    // under what name will the image be saved
+    const file_extention = path.extname(file.originalname);
+    const uniqueSuffix = Date.now() + file_extention;
+    cb(null, file.fieldname + "-" + uniqueSuffix);
+  },
+  limits: {
+    // taille max image
+    fileSize: 1024 * 1024,
+  },
+});
+
+// file filter function
+const fileFilterFunction = (req, file, cb) => {
+  const file_extention = path.extname(file.originalname);
+  const allowedExtentions = [".jpg", ".jpeg", ".png", ".gif"];
+  if (!allowedExtentions.includes(file_extention)) {
+    return cb(new Error("Only images are allowed"));
+  }
+  cb(null, true);
+};
+// 2.0 create upload
+const upload = multer({ storage: my_storage, fileFilter: fileFilterFunction });
+
+const Book = require("../models/bookSchema");
 
 // get all Books request  :
 router.get("/books", async (req, res) => {
@@ -18,7 +52,7 @@ router.get("/books", async (req, res) => {
 // get Book by Id
 router.get("/book/:id", async (req, res) => {
   try {
-    const book = await Book.findById(req.params.id).populate('reviews');
+    const book = await Book.findById(req.params.id).populate("reviews");
     if (book) {
       // checking if the Id is valid
       res.json({
@@ -37,14 +71,34 @@ router.get("/book/:id", async (req, res) => {
     });
   }
 });
-
 // create a new Book
-router.post("/newbook", async (req, res) => {
+router.post("/newbook", upload.single("bookCover"), async (req, res) => {
   try {
-    const book = await Book.create(req.body);
-    res.status(200).json({
-      book: book,
-    });
+    if (req.file) {
+      const book = await Book.create({
+        title: req.body.title,
+        author: req.body.author,
+        description: req.body.description,
+        reviews: req.body.reviews,
+        bookScore: req.body.bookScore,
+        bookCover: req.file.path,
+      });
+      res.status(200).json({
+        book: book,
+      });
+    } else {
+      // multer does not allow no file req operation in case the user did not choose a picture
+      const book = await Book.create({
+        title: req.body.title,
+        author: req.body.author,
+        description: req.body.description,
+        reviews: req.body.reviews,
+        bookScore: req.body.bookScore,
+      });
+      res.status(200).json({
+        book: book,
+      });
+    }
   } catch (error) {
     res.status(500).json({
       message: error.message,
@@ -52,12 +106,32 @@ router.post("/newbook", async (req, res) => {
   }
 });
 // update book
-router.put("/book/:id", async (req, res) => {
+router.put("/book/:id", upload.single("bookCover"), async (req, res) => {
   try {
-    const book = await Book.findByIdAndUpdate(req.params.id, req.body, {
-      new: true,
-    });
+    const oldbook = await Book.findById(req.params.id);
+
+    const book = await Book.findByIdAndUpdate(
+      req.params.id,
+      {
+        title: req.body.title,
+        author: req.body.author,
+        description: req.body.description,
+        reviews: req.body.reviews,
+        bookScore: req.body.bookScore,
+        bookCover: req.file.path,
+      },
+      {
+        new: true,
+      }
+    );
     if (book) {
+      try {
+        // this is for removing old image after updating book image
+        fs.unlinkSync(oldbook.bookCover);
+        //file removed
+      } catch (err) {
+        console.error(err);
+      }
       // checking if the book already exist or not
       res.json({
         message: "book has been updated .",
@@ -90,7 +164,7 @@ router.delete("/book/:id", async (req, res) => {
     res.status(500).json({ message: "Internal server error!" });
   }
 });
-// affect a review 
+// affect a review
 router.put("/affect-review/:idbook/:idreview", async (req, res) => {
   try {
     const book = await Book.findByIdAndUpdate(
@@ -106,7 +180,7 @@ router.put("/affect-review/:idbook/:idreview", async (req, res) => {
     res.status(500).json({ message: "Internal server error!" });
   }
 });
-// remove review 
+// remove review
 router.put("/desaffect-review/:idbook/:idreview", async (req, res) => {
   try {
     const book = await Book.findByIdAndUpdate(
@@ -121,6 +195,6 @@ router.put("/desaffect-review/:idbook/:idreview", async (req, res) => {
     console.log(error);
     res.status(500).json({ message: "Internal server error!" });
   }
-});  
+});
 
 module.exports = router;

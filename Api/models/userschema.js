@@ -15,17 +15,19 @@ const userSchema = new Schema(
       unique: true,
       match: /^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$/,
     },
-    password: { type: String, required: true, minlength: 6 },
+    password: {
+      type: String,
+      required: true,
+      minlength: 6,
+    },
     age: Number,
     country: String,
     city: String,
     phone: Number,
-    image: String,
+    image: {type : String , required : false },
     favoritbooks: [{ type: mongoose.Schema.Types.ObjectId, ref: "Book" }],
     reviews: [{ type: mongoose.Schema.Types.ObjectId, ref: "Review" }],
     addedbooks: [{ type: mongoose.Schema.Types.ObjectId, ref: "Book" }],
-    image : String
-
   },
   { versionKey: false, timestamps: true }
 );

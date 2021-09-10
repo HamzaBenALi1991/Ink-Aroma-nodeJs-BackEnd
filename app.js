@@ -30,6 +30,9 @@ mongoose
 
 // setting up morgan pachage
 app.use(morgan("dev"));
+// making uploads public 
+app.use( "/uploads", express.static("uploads"))
+
 // config bodyparser
 app.use(
   express.json({
