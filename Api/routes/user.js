@@ -307,7 +307,31 @@ router.put("/user/newbook/:iduser/:idbook", async (req, res) => {
   }
 });
 
-// login 
 
+// login 
+router.post('/login' , async (req,res)=>{
+  try{
+    const user = await User.findOne({email : req.body.email}); 
+    if (user) {
+      const cmp = await bcrypt.compare(req.body.password , user.password); 
+      if (cmp) {
+        res.status(200).json({
+          message :"Login Succeded . "
+        })
+      } else {
+        res.status(422).json({
+          message :"Please make sure the email and password are correct ."
+        })
+      }
+    } else {
+      res.send({message : "Please make sure the email and password are correct ."})
+    }
+
+  }catch(error){
+    res.status(500).json({
+      message : error.message 
+    })
+  }
+})
 
 module.exports = router;
