@@ -9,6 +9,7 @@ const mongoose =require('mongoose')
 const UserRoutes = require("./Api/routes/user");
 const BookRoutes =require('./Api/routes/book');
 const ReviewRoutes =require('./Api/routes/review')
+const emailRoutes = require('./Api/routes/EmailApi')
 
 
 // stting up mongoose connect 
@@ -63,7 +64,8 @@ app.use((req, res, next) => {
 // routes that handls requests
 app.use("/", UserRoutes);
 app.use('/',BookRoutes); 
-app.use('/',ReviewRoutes) 
+app.use('/',ReviewRoutes) ;
+app.use('/users/mail' , emailRoutes)
 
 // handlying all wrong routes  :
 
