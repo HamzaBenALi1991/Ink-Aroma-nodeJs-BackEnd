@@ -1,5 +1,7 @@
 const express = require("express");
 const router = express.Router();
+// jsonweb token
+const jwt = require("jsonwebtoken");
 // importing User schema
 const User = require("../models/userschema");
 // multer needed packages
@@ -9,6 +11,8 @@ const path = require("path");
 const fs = require("fs");
 // for hashing password
 const bcrypt = require("bcrypt");
+// passport
+const passport = require("passport");
 
 // multer configuration
 const my_storage = multer.diskStorage({
@@ -42,17 +46,21 @@ const fileFilterFunction = (req, file, cb) => {
 const upload = multer({ storage: my_storage, fileFilter: fileFilterFunction });
 
 // get all users request  :
-router.get("/users", async (req, res) => {
-  try {
-    const users = await User.find({});
-    res.status(200).json({
-      users: users,
-    });
-  } catch (error) {
-    console.log(error);
-    res.status(500).json({ message: "Internal server error!" });
+router.get(
+  "/users",
+  passport.authenticate("bearer", { session: false }),
+  async (req, res) => {
+    try {
+      const users = await User.find({});
+      res.status(200).json({
+        users: users,
+      });
+    } catch (error) {
+      console.log(error);
+      res.status(500).json({ message: "Internal server error!" });
+    }
   }
-});
+);
 // get user by Id
 router.get("/user/:id", async (req, res) => {
   try {
@@ -83,11 +91,12 @@ router.get("/user/:id", async (req, res) => {
 router.post("/newuser", upload.single("userImage"), async (req, res) => {
   try {
     const hash = await bcrypt.hash(req.body.password, 10);
-    const exist = await User.find({email : req.body.email})
-    if (exist.length>0) { // in case find return nothing its not null ot empty array
+    const exist = await User.find({ email: req.body.email });
+    if (exist.length > 0) {
+      // in case find return nothing its not null ot empty array
       res.status(409).json({
-        message : "email already exist . "
-      })
+        message: "email already exist . ",
+      });
     } else {
       if (req.file) {
         // checking if there is an image or not ,else multer will block it
@@ -173,7 +182,7 @@ router.put("/user/:id", upload.single("userImage"), async (req, res) => {
         message: "user has been updated .",
         newUserInfos: user,
       });
-    } else if (olduser && req.file==undefined) {
+    } else if (olduser && req.file == undefined) {
       const user = await User.findByIdAndUpdate(
         req.params.id,
         {
@@ -195,8 +204,8 @@ router.put("/user/:id", upload.single("userImage"), async (req, res) => {
         }
       );
       res.status(200).json({
-        user : user 
-      })
+        user: user,
+      });
     } else {
       res.status(404).json({
         message:
@@ -307,31 +316,44 @@ router.put("/user/newbook/:iduser/:idbook", async (req, res) => {
   }
 });
 
-
-// login 
-router.post('/login' , async (req,res)=>{
-  try{
-    const user = await User.findOne({email : req.body.email}); 
+// login
+router.post("/login", async (req, res) => {
+  try {
+    const user = await User.findOne({ email: req.body.email });
     if (user) {
-      const cmp = await bcrypt.compare(req.body.password , user.password); 
+      // check password if correct
+      const cmp = await bcrypt.compare(req.body.password, user.password);
       if (cmp) {
-        res.status(200).json({
-          message :"Login Succeded . "
-        })
+        const tokenData = {
+          // add as many needed informations
+          email: user.email,
+          Psoeudo: user.pseudo,
+          Age: user.age,
+          Id: user._id,
+        };
+        const token = jwt.sign(tokenData, "hamza", {
+          expiresIn: "1d",
+        });
+
+        res.status(403).json({
+          message: "Login Succeded . ",
+          token: token,
+        });
       } else {
-        res.status(422).json({
-          message :"Please make sure the email and password are correct ."
-        })
+        res.status(403).json({
+          message: "Please make sure the email and password are correct .",
+        });
       }
     } else {
-      res.send({message : "Please make sure the email and password are correct ."})
+      res.send({
+        message: "Please make sure the email and password are correct .",
+      });
     }
-
-  }catch(error){
+  } catch (error) {
     res.status(500).json({
-      message : error.message 
-    })
+      message: error.message,
+    });
   }
-})
+});
 
 module.exports = router;

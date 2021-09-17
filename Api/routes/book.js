@@ -4,6 +4,7 @@ const router = express.Router();
 const multer = require("multer");
 const path = require("path");
 const fs = require("fs");
+const passport =require('passport')
 // multer configuration
 const my_storage = multer.diskStorage({
   destination: (req, file, cb) => {
@@ -38,17 +39,21 @@ const upload = multer({ storage: my_storage, fileFilter: fileFilterFunction });
 const Book = require("../models/bookSchema");
 
 // get all Books request  :
-router.get("/books", async (req, res) => {
-  try {
-    const books = await Book.find({});
-    res.status(200).json({
-      books: books,
-    });
-  } catch (error) {
-    console.log(error);
-    res.status(500).json({ message: "Internal server error!" });
+router.get(
+  "/books",
+  passport.authenticate("bearer", { session: false }),
+  async (req, res) => {
+    try {
+      const books = await Book.find({});
+      res.status(200).json({
+        books: books,
+      });
+    } catch (error) {
+      console.log(error);
+      res.status(500).json({ message: "Internal server error!" });
+    }
   }
-});
+);
 // get Book by Id
 router.get("/book/:id", async (req, res) => {
   try {

@@ -4,6 +4,8 @@ const app = express();
 const morgan = require("morgan");
 const bodyparser = require("body-parser");
 const mongoose =require('mongoose')
+// bearer strategie  with passport 
+require('./passport/bearerStrategie')
 
 // importing routes
 const UserRoutes = require("./Api/routes/user");
