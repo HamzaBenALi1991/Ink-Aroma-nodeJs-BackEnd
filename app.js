@@ -6,6 +6,11 @@ const bodyparser = require("body-parser");
 const mongoose =require('mongoose')
 // bearer strategie  with passport 
 require('./passport/bearerStrategie')
+// dotenv config 
+require('dotenv').config()
+
+
+
 
 // importing routes
 const UserRoutes = require("./Api/routes/user");

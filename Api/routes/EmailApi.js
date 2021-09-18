@@ -17,13 +17,14 @@ router.post("/", async (req, res) => {
     // send mail with text
     const mailtext = await transporter.sendMail({
       from: '" Hatem" <testforhamza@gmail.com>', // sender address
-      to: "testforhamza@gmail.com", // list of receivers
+      to: "hatem.dagbouj@fivepoints.fr", // list of receivers
       subject: "Hello ✔", // Subject line
       text: "Hello SHinigami again ", // plain text body
       html: "<h1> Hello Shinigami  </h1>", // html body
+      
     });
     res.json({message : " mail sent successfully ."} )
-  } catch {
+  } catch(error) {
     console.log(error);
     res.status(500).json({ message: "Internal server error!" });
   }
