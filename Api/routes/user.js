@@ -250,18 +250,20 @@ router.delete(
 
 // affect a favour book to a user using book Id
 router.put(
-  "/affect-book/:iduser/:idbook",
+  "/affect-book/:idbook",
   passport.authenticate("bearer", { session: false }),
   async (req, res) => {
     try {
-      const user = await User.findByIdAndUpdate(
-        req.params.iduser,
+       await User.findByIdAndUpdate(
+        req.user.id,
         { $push: { favoritbooks: req.params.idbook } },
         {
           new: true,
         }
       );
-      res.json(user);
+      res.status(200).json({
+        message : "book added successfully to Favorits . "
+      })
     } catch (error) {
       console.log(error);
       res.status(500).json({ message: "Internal server error!" });
@@ -269,86 +271,30 @@ router.put(
   }
 );
 
-// desafecte a book from a user using bookId
+// desafecte a favriout book from a user using bookId
 router.put(
-  "/desaffect-book/:iduser/:idbook",
+  "/desaffect-book/:idbook",
   passport.authenticate("bearer", { session: false }),
   async (req, res) => {
     try {
-      const user = await User.findByIdAndUpdate(
+       await User.findByIdAndUpdate(
         req.params.iduser,
         { $pull: { favoritbooks: req.params.idbook } },
         {
           new: true,
         }
       );
-      res.json(user);
+      res.status(200).json({
+        message :"Book has been removed from you <3 list .  "
+      });
     } catch (error) {
       console.log(error);
       res.status(500).json({ message: "Internal server error!" });
     }
   }
 );
-// affect a review to a user using review Id
-router.put(
-  "/affect-reviewtouser/:iduser/:idreview",
-  passport.authenticate("bearer", { session: false }),
-  async (req, res) => {
-    try {
-      const user = await User.findByIdAndUpdate(
-        req.params.iduser,
-        { $push: { reviews: req.params.idreview } },
-        {
-          new: true,
-        }
-      );
-      res.json(user);
-    } catch (error) {
-      console.log(error);
-      res.status(500).json({ message: "Internal server error!" });
-    }
-  }
-);
-// remove review
-router.put(
-  "/desaffect-reviewtouser/:iduser/:idreview",
-  passport.authenticate("bearer", { session: false }),
-  async (req, res) => {
-    try {
-      const user = await User.findByIdAndUpdate(
-        req.params.iduser,
-        { $pull: { reviews: req.params.idreview } },
-        {
-          new: true,
-        }
-      );
-      res.json(user);
-    } catch (error) {
-      console.log(error);
-      res.status(500).json({ message: "Internal server error!" });
-    }
-  }
-);
-// added book api ( book that has been added by the user . )
-router.put(
-  "/user/newbook/:iduser/:idbook",
-  passport.authenticate("bearer", { session: false }),
-  async (req, res) => {
-    try {
-      const user = await User.findByIdAndUpdate(
-        req.params.iduser,
-        { $push: { addedbooks: req.params.idbook } },
-        {
-          new: true,
-        }
-      );
-      res.json(user);
-    } catch (error) {
-      console.log(error);
-      res.status(500).json({ message: "Internal server error!" });
-    }
-  }
-);
+
+
 
 // login
 router.post("/login", async (req, res) => {

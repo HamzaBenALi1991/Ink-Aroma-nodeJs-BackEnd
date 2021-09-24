@@ -5,6 +5,7 @@ const multer = require("multer");
 const path = require("path");
 const fs = require("fs");
 const passport = require("passport");
+const User = require("../models/userschema");
 // multer configuration
 const my_storage = multer.diskStorage({
   destination: (req, file, cb) => {
@@ -80,7 +81,7 @@ router.get(
     }
   }
 );
-// create a new Book
+// create a new Book AND  affecting the book to the user AddedBooks
 router.post(
   "/newbook",
   passport.authenticate("bearer", { session: false }),
@@ -99,6 +100,14 @@ router.post(
         res.status(200).json({
           book: book,
         });
+        // adding book id to user addedbook
+        await User.findByIdAndUpdate(
+          req.user.id,
+          { $push: { addedbooks: book._id } },
+          {
+            new: true,
+          }
+        );
       } else {
         // multer does not allow no file req operation in case the user did not choose a picture
         const book = await Book.create({
@@ -108,6 +117,15 @@ router.post(
           reviews: req.body.reviews,
           bookScore: req.body.bookScore,
         });
+        // adding book id to user addedbook
+
+        await User.findByIdAndUpdate(
+          req.user.id,
+          { $push: { addedbooks: book._id } },
+          {
+            new: true,
+          }
+        );
         res.status(200).json({
           book: book,
         });
@@ -185,7 +203,7 @@ router.put(
     }
   }
 );
-// delete book by Id
+// delete book by Id plus removing from user added books
 router.delete(
   "/book/:id",
   passport.authenticate("bearer", { session: false }),
@@ -193,6 +211,14 @@ router.delete(
     try {
       const book = await Book.findByIdAndRemove(req.params.id);
       if (book) {
+        // remove book from user added book
+        await User.findByIdAndUpdate(
+          req.user.id,
+          { $pull: { addedbooks: book._id } },
+          {
+            new: true,
+          }
+        );
         res.json({ message: "Book been deleted successfully" });
       } else {
         res.status(404).json({

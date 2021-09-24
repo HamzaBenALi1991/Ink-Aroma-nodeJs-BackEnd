@@ -21,13 +21,21 @@ router.get(
     }
   }
 );
-// create a new review
+// create a new review + adding the review Id to the user reviews
 router.post(
   "/newreview",
   passport.authenticate("bearer", { session: false }),
   async (req, res) => {
     try {
       const review = await Reviews.create(req.body);
+      //adding the review Id to the user reviews
+      await User.findByIdAndUpdate(
+        req.user.id,
+        { $push: { reviews: review.id } },
+        {
+          new: true,
+        }
+      );
       res.status(200).json({
         review: review,
       });
@@ -74,6 +82,13 @@ router.delete(
     try {
       const review = await Reviews.findByIdAndRemove(req.params.id);
       if (review) {
+        await User.findByIdAndUpdate(
+          req.user.id,
+          { $pull: { reviews: review.id } },
+          {
+            new: true,
+          }
+        );
         res.json({ message: "Review been deleted successfully" });
       } else {
         res.status(404).json({
