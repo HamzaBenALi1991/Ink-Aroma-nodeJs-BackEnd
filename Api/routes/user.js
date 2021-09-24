@@ -152,8 +152,8 @@ router.post("/newuser", upload.single("userImage"), async (req, res) => {
 // update user
 router.put(
   "/user/:id",
-  passport.authenticate("bearer", { session: false }),
-  upload.single("userImage"),
+ [ passport.authenticate("bearer", { session: false }),
+  upload.single("userImage")],
   async (req, res) => {
     try {
       const hash = await bcrypt.hash(req.body.password, 10);

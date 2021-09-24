@@ -84,8 +84,8 @@ router.get(
 // create a new Book AND  affecting the book to the user AddedBooks
 router.post(
   "/newbook",
-  passport.authenticate("bearer", { session: false }),
-  upload.single("bookCover"),
+ [ passport.authenticate("bearer", { session: false }),
+  upload.single("bookCover")],
   async (req, res) => {
     try {
       if (req.file) {
@@ -140,8 +140,8 @@ router.post(
 // update book
 router.put(
   "/book/:id",
-  passport.authenticate("bearer", { session: false }),
-  upload.single("bookCover"),
+  [passport.authenticate("bearer", { session: false }),
+  upload.single("bookCover")],
   async (req, res) => {
     try {
       const oldbook = await Book.findById(req.params.id);

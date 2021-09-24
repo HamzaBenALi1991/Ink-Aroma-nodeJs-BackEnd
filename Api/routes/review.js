@@ -21,7 +21,7 @@ router.get(
     }
   }
 );
-// create a new review + adding the review Id to the user reviews
+// create a new review + adding the review Id to the user reviews array 
 router.post(
   "/newreview",
   passport.authenticate("bearer", { session: false }),
@@ -74,7 +74,7 @@ router.put(
     }
   }
 );
-// delete review by Id
+// delete review by Id + removing from user reviews array 
 router.delete(
   "/review/:id",
   passport.authenticate("bearer", { session: false }),
@@ -101,6 +101,7 @@ router.delete(
     }
   }
 );
+// get review by id
 router.get(
   "/review/:id",
   passport.authenticate("bearer", { session: false }),
