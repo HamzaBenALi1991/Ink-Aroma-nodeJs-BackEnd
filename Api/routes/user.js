@@ -51,6 +51,7 @@ router.get(
   passport.authenticate("bearer", { session: false }),
   async (req, res) => {
     try {
+
       const users = await User.find({});
       res.status(200).json({
         users: users,
@@ -62,30 +63,34 @@ router.get(
   }
 );
 // get user by Id
-router.get("/user/:id", async (req, res) => {
-  try {
-    const user = await User.findById(req.params.id).populate(
-      "favoritbooks reviews"
-    );
-    if (user) {
-      // checking if the Id is valid
-      res.json({
-        user: user,
-        url: "http://localhost:3000/users/" + user._id,
-      });
-    } else {
-      // response if the Id is not valid
-      res.status(404).json({
-        message: "there is no user with this ID",
+router.get(
+  "/user/:id",
+  passport.authenticate("bearer", { session: false }),
+  async (req, res) => {
+    try {
+      const user = await User.findById(req.params.id).populate(
+        "favoritbooks reviews"
+      );
+      if (user) {
+        // checking if the Id is valid
+        res.json({
+          user: user,
+          url: "http://localhost:3000/users/" + user._id,
+        });
+      } else {
+        // response if the Id is not valid
+        res.status(404).json({
+          message: "there is no user with this ID",
+        });
+      }
+    } catch (error) {
+      // catch block for different kind of error
+      res.status(500).json({
+        message: error.message,
       });
     }
-  } catch (error) {
-    // catch block for different kind of error
-    res.status(500).json({
-      message: error.message,
-    });
   }
-});
+);
 
 // create a user
 router.post("/newuser", upload.single("userImage"), async (req, res) => {
@@ -145,176 +150,205 @@ router.post("/newuser", upload.single("userImage"), async (req, res) => {
   }
 });
 // update user
-router.put("/user/:id", upload.single("userImage"), async (req, res) => {
-  try {
-    const hash = await bcrypt.hash(req.body.password, 10);
-    const olduser = await User.findById(req.params.id);
-    if (olduser && req.file) {
-      const user = await User.findByIdAndUpdate(
-        req.params.id,
-        {
-          pseudo: req.body.pseudo,
-          firstname: req.body.firstname,
-          lastname: req.body.lastname,
-          email: req.body.email,
-          password: hash,
-          age: req.body.age,
-          country: req.body.country,
-          city: req.body.city,
-          phone: req.body.phone,
-          image: req.file.path,
-          favoritbooks: req.body.favoritbooks,
-          addedbooks: req.body.addedbooks,
-          reviews: req.body.reviews,
-        },
-        {
-          new: true,
+router.put(
+  "/user/:id",
+  passport.authenticate("bearer", { session: false }),
+  upload.single("userImage"),
+  async (req, res) => {
+    try {
+      const hash = await bcrypt.hash(req.body.password, 10);
+      const olduser = await User.findById(req.params.id);
+      if (olduser && req.file) {
+        const user = await User.findByIdAndUpdate(
+          req.params.id,
+          {
+            pseudo: req.body.pseudo,
+            firstname: req.body.firstname,
+            lastname: req.body.lastname,
+            email: req.body.email,
+            password: hash,
+            age: req.body.age,
+            country: req.body.country,
+            city: req.body.city,
+            phone: req.body.phone,
+            image: req.file.path,
+            favoritbooks: req.body.favoritbooks,
+            addedbooks: req.body.addedbooks,
+            reviews: req.body.reviews,
+          },
+          {
+            new: true,
+          }
+        );
+        // this is for removing old image after updating
+        try {
+          fs.unlinkSync(olduser.image);
+          //file removed
+        } catch (err) {
+          console.error(err);
         }
-      );
-      // this is for removing old image after updating
-      try {
-        fs.unlinkSync(olduser.image);
-        //file removed
-      } catch (err) {
-        console.error(err);
+        res.json({
+          message: "user has been updated .",
+          newUserInfos: user,
+        });
+      } else if (olduser && req.file == undefined) {
+        const user = await User.findByIdAndUpdate(
+          req.params.id,
+          {
+            pseudo: req.body.pseudo,
+            firstname: req.body.firstname,
+            lastname: req.body.lastname,
+            email: req.body.email,
+            password: hash,
+            age: req.body.age,
+            country: req.body.country,
+            city: req.body.city,
+            phone: req.body.phone,
+            favoritbooks: req.body.favoritbooks,
+            addedbooks: req.body.addedbooks,
+            reviews: req.body.reviews,
+          },
+          {
+            new: true,
+          }
+        );
+        res.status(200).json({
+          user: user,
+        });
+      } else {
+        res.status(404).json({
+          message:
+            " there is no user with this ID to update .please check ID again .",
+        });
       }
-      res.json({
-        message: "user has been updated .",
-        newUserInfos: user,
-      });
-    } else if (olduser && req.file == undefined) {
-      const user = await User.findByIdAndUpdate(
-        req.params.id,
-        {
-          pseudo: req.body.pseudo,
-          firstname: req.body.firstname,
-          lastname: req.body.lastname,
-          email: req.body.email,
-          password: hash,
-          age: req.body.age,
-          country: req.body.country,
-          city: req.body.city,
-          phone: req.body.phone,
-          favoritbooks: req.body.favoritbooks,
-          addedbooks: req.body.addedbooks,
-          reviews: req.body.reviews,
-        },
-        {
-          new: true,
-        }
-      );
-      res.status(200).json({
-        user: user,
-      });
-    } else {
-      res.status(404).json({
-        message:
-          " there is no user with this ID to update .please check ID again .",
-      });
+    } catch (error) {
+      console.log(error);
+      res.status(500).json({ message: "Internal server error!" });
     }
-  } catch (error) {
-    console.log(error);
-    res.status(500).json({ message: "Internal server error!" });
   }
-});
+);
 // delete user by Id
-router.delete("/user/:id", async (req, res) => {
-  try {
-    const user = await User.findByIdAndRemove(req.params.id);
-    if (user) {
-      res.json({ message: "User been deleted successfully" });
-    } else {
-      res.status(404).json({
-        message: "there is no user with this ID so you can delete it .",
-      });
+router.delete(
+  "/user/:id",
+  passport.authenticate("bearer", { session: false }),
+  async (req, res) => {
+    try {
+      const user = await User.findByIdAndRemove(req.params.id);
+      if (user) {
+        res.json({ message: "User been deleted successfully" });
+      } else {
+        res.status(404).json({
+          message: "there is no user with this ID so you can delete it .",
+        });
+      }
+    } catch (error) {
+      console.log(error);
+      res.status(500).json({ message: "Internal server error!" });
     }
-  } catch (error) {
-    console.log(error);
-    res.status(500).json({ message: "Internal server error!" });
   }
-});
+);
 
 // affect a favour book to a user using book Id
-router.put("/affect-book/:iduser/:idbook", async (req, res) => {
-  try {
-    const user = await User.findByIdAndUpdate(
-      req.params.iduser,
-      { $push: { favoritbooks: req.params.idbook } },
-      {
-        new: true,
-      }
-    );
-    res.json(user);
-  } catch (error) {
-    console.log(error);
-    res.status(500).json({ message: "Internal server error!" });
+router.put(
+  "/affect-book/:iduser/:idbook",
+  passport.authenticate("bearer", { session: false }),
+  async (req, res) => {
+    try {
+      const user = await User.findByIdAndUpdate(
+        req.params.iduser,
+        { $push: { favoritbooks: req.params.idbook } },
+        {
+          new: true,
+        }
+      );
+      res.json(user);
+    } catch (error) {
+      console.log(error);
+      res.status(500).json({ message: "Internal server error!" });
+    }
   }
-});
+);
 
 // desafecte a book from a user using bookId
-router.put("/desaffect-book/:iduser/:idbook", async (req, res) => {
-  try {
-    const user = await User.findByIdAndUpdate(
-      req.params.iduser,
-      { $pull: { favoritbooks: req.params.idbook } },
-      {
-        new: true,
-      }
-    );
-    res.json(user);
-  } catch (error) {
-    console.log(error);
-    res.status(500).json({ message: "Internal server error!" });
+router.put(
+  "/desaffect-book/:iduser/:idbook",
+  passport.authenticate("bearer", { session: false }),
+  async (req, res) => {
+    try {
+      const user = await User.findByIdAndUpdate(
+        req.params.iduser,
+        { $pull: { favoritbooks: req.params.idbook } },
+        {
+          new: true,
+        }
+      );
+      res.json(user);
+    } catch (error) {
+      console.log(error);
+      res.status(500).json({ message: "Internal server error!" });
+    }
   }
-});
+);
 // affect a review to a user using review Id
-router.put("/affect-reviewtouser/:iduser/:idreview", async (req, res) => {
-  try {
-    const user = await User.findByIdAndUpdate(
-      req.params.iduser,
-      { $push: { reviews: req.params.idreview } },
-      {
-        new: true,
-      }
-    );
-    res.json(user);
-  } catch (error) {
-    console.log(error);
-    res.status(500).json({ message: "Internal server error!" });
+router.put(
+  "/affect-reviewtouser/:iduser/:idreview",
+  passport.authenticate("bearer", { session: false }),
+  async (req, res) => {
+    try {
+      const user = await User.findByIdAndUpdate(
+        req.params.iduser,
+        { $push: { reviews: req.params.idreview } },
+        {
+          new: true,
+        }
+      );
+      res.json(user);
+    } catch (error) {
+      console.log(error);
+      res.status(500).json({ message: "Internal server error!" });
+    }
   }
-});
+);
 // remove review
-router.put("/desaffect-reviewtouser/:iduser/:idreview", async (req, res) => {
-  try {
-    const user = await User.findByIdAndUpdate(
-      req.params.iduser,
-      { $pull: { reviews: req.params.idreview } },
-      {
-        new: true,
-      }
-    );
-    res.json(user);
-  } catch (error) {
-    console.log(error);
-    res.status(500).json({ message: "Internal server error!" });
+router.put(
+  "/desaffect-reviewtouser/:iduser/:idreview",
+  passport.authenticate("bearer", { session: false }),
+  async (req, res) => {
+    try {
+      const user = await User.findByIdAndUpdate(
+        req.params.iduser,
+        { $pull: { reviews: req.params.idreview } },
+        {
+          new: true,
+        }
+      );
+      res.json(user);
+    } catch (error) {
+      console.log(error);
+      res.status(500).json({ message: "Internal server error!" });
+    }
   }
-});
+);
 // added book api ( book that has been added by the user . )
-router.put("/user/newbook/:iduser/:idbook", async (req, res) => {
-  try {
-    const user = await User.findByIdAndUpdate(
-      req.params.iduser,
-      { $push: { addedbooks: req.params.idbook } },
-      {
-        new: true,
-      }
-    );
-    res.json(user);
-  } catch (error) {
-    console.log(error);
-    res.status(500).json({ message: "Internal server error!" });
+router.put(
+  "/user/newbook/:iduser/:idbook",
+  passport.authenticate("bearer", { session: false }),
+  async (req, res) => {
+    try {
+      const user = await User.findByIdAndUpdate(
+        req.params.iduser,
+        { $push: { addedbooks: req.params.idbook } },
+        {
+          new: true,
+        }
+      );
+      res.json(user);
+    } catch (error) {
+      console.log(error);
+      res.status(500).json({ message: "Internal server error!" });
+    }
   }
-});
+);
 
 // login
 router.post("/login", async (req, res) => {
@@ -331,9 +365,8 @@ router.post("/login", async (req, res) => {
           Age: user.age,
           Id: user._id,
         };
-        console.log(process.env.user);
         const token = jwt.sign(tokenData, process.env.JWT_SECRET, {
-          expiresIn: "1d",
+          expiresIn: process.env.JWT_EXPIRE,
         });
 
         res.status(403).json({

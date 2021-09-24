@@ -13,7 +13,7 @@ passport.use(
       if (!user) {
         return done(null, false);
       } else {
-        return done(null, user, { scope: "all" });
+        return done(null,user, { scope: "all" });
       }
     } catch (error) {
         console.log(error);
