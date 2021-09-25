@@ -5,10 +5,10 @@ const bookSchema = mongoose.Schema(
   {
     title: { type: String, required: true, unique: true },
     author: { type: String, required: true },
-    bookCover: String,
-    description: String,
+    bookCover: {type : String , required :false },
+    description: {type : String , required :false },
     reviews: [{ type: mongoose.Schema.Types.ObjectId, ref: "Review" }],
-    BookScore: Number,
+    BookScore: {type : Number , required :false , default : -1 },
   },
   { versionKey: false, timestamps: true }
 );

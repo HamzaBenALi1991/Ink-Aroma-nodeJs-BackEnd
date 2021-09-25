@@ -4,6 +4,7 @@ const app = express();
 const morgan = require("morgan");
 const bodyparser = require("body-parser");
 const mongoose =require('mongoose')
+const cors =require("cors")
 // bearer strategie  with passport 
 require('./passport/bearerStrategie')
 // dotenv config 
@@ -38,35 +39,18 @@ mongoose
 
 // setting up morgan pachage
 app.use(morgan("dev"));
-// making uploads public 
-app.use( "/uploads", express.static("uploads"))
-
 // config bodyparser
 app.use(
   express.json({
     extended: true,
   })
 );
+
 // CORS handlying
-app.use((req, res, next) => {
-  res.header("Access-Control-Allow-Origin", "*");
-  res.header(
-    "Access-Control-Allow-Origin",
-    "OriginnX-requested-With,Content-Type,Accept,Authorization"
-  );
-  if (req.method === "OPTIONS") {
-    res.header(
-      "Access-Control-Allow-Methods",
-      "PUT",
-      "POST",
-      "PATCH",
-      "GET",
-      "DELETE"
-    );
-    return res.status(200).json({});
-  }
-  next();
-});
+app.use(cors());
+
+// making uploads public 
+app.use( "/uploads", express.static("uploads"));
 
 // routes that handls requests
 app.use("/", UserRoutes);
