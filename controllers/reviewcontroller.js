@@ -13,7 +13,7 @@ exports.getall = async (req, res) => {
     res.status(500).json({ message: "Internal server error!" });
   }
 };
-// create review controller
+// create a new review + adding the review Id to the user reviews array
 exports.createRev = async (req, res) => {
   try {
     const review = await Reviews.create(req.body);
@@ -34,7 +34,7 @@ exports.createRev = async (req, res) => {
     });
   }
 };
-// delete review controller
+// delete review by Id + removing from user reviews array
 exports.delete = async (req, res) => {
   try {
     const review = await Reviews.findByIdAndRemove(req.params.id);

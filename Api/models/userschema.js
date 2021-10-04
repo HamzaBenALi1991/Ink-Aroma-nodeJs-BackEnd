@@ -22,7 +22,6 @@ const userSchema = new Schema(
     },
     age: {type : Number , required :false },
     country: {type : String , required :false },
-    city: {type : String , required :false },
     phone: {type : Number , required :false },
     image: {type : String , required : false },
     favoritbooks: [{ type: mongoose.Schema.Types.ObjectId, ref: "Book" }],
