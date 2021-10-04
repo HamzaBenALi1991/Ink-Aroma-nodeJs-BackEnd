@@ -54,6 +54,7 @@ exports.update = async (req, res) => {
           reviews: req.body.reviews,
           bookScore: req.body.bookScore,
           bookCover: req.file.path,
+          categorie : req.body.categorie
         },
         {
           new: true,
@@ -80,6 +81,7 @@ exports.update = async (req, res) => {
           description: req.body.description,
           reviews: req.body.reviews,
           bookScore: req.body.bookScore,
+          categorie : req.body.categorie
         },
         {
           new: true,
@@ -135,6 +137,7 @@ exports.createBook = async (req, res) => {
         reviews: req.body.reviews,
         bookScore: req.body.bookScore,
         bookCover: req.file.path,
+        categorie : req.body.categorie
       });
       res.status(200).json({
         book: book,
