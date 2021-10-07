@@ -9,7 +9,7 @@ const bookSchema = mongoose.Schema(
     description: {type : String , required :false },
     reviews: [{ type: mongoose.Schema.Types.ObjectId, ref: "Review" }],
     BookScore: {type : Number , required :false , default : -1 },
-    categorie : { type :string  , required : true }
+    categorie : { type :String  , required : true }
   },
   { versionKey: false, timestamps: true }
 );
