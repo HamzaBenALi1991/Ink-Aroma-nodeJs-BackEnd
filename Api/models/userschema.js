@@ -20,7 +20,7 @@ const userSchema = new Schema(
       required: true,
       minlength: 6,
     },
-    age: {type : Number , required :false },
+    age: {type : String , required :false },
     country: {type : String , required :false },
     phone: {type : Number , required :false },
     image: {type : String , required : false },

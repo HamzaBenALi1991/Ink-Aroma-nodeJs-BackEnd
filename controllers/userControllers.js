@@ -56,31 +56,8 @@ exports.register = async (req, res) => {
     const exist = await User.find({ email: req.body.email });
     if (exist.length > 0) {
       // in case find return nothing its not null ot empty array
-      res.status(409).json({
-        message: "email already exist . ",
-      });
+      res.status(409).json("Email alreadt exist");
     } else {
-      if (req.file) {
-        // checking if there is an image or not ,else multer will block it
-        const user = await User.create({
-          pseudo: req.body.pseudo,
-          firstname: req.body.firstname,
-          lastname: req.body.lastname,
-          email: req.body.email,
-          password: hash,
-          age: req.body.age,
-          country: req.body.country,
-          city: req.body.city,
-          phone: req.body.phone,
-          image: req.file.path,
-          favoritbooks: req.body.favoritbooks,
-          addedbooks: req.body.addedbooks,
-          reviews: req.body.reviews,
-        });
-        res.status(200).json({
-          user: user,
-        });
-      } else {
         const user = await User.create({
           pseudo: req.body.pseudo,
           firstname: req.body.firstname,
@@ -98,9 +75,10 @@ exports.register = async (req, res) => {
         res.status(200).json({
           user: user,
         });
-      }
+      
     }
   } catch (error) {
+    console.log(error)
     res.status(500).json({
       message: error.message,
     });
