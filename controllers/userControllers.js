@@ -20,7 +20,7 @@ exports.login = async (req, res) => {
         const tokenData = {
           // add as many needed informations
           email: user.email,
-          Psoeudo: user.pseudo,
+          Pseudo: user.pseudo,
           Age: user.age,
           Id: user._id,
         };
@@ -28,7 +28,7 @@ exports.login = async (req, res) => {
           expiresIn: process.env.JWT_EXPIRE,
         });
 
-        res.status(403).json({
+        res.status(200).json({
           message: "Login Succeded . ",
           token: token,
         });
@@ -38,7 +38,7 @@ exports.login = async (req, res) => {
         });
       }
     } else {
-      res.send({
+      res.status(403).json({
         message: "Please make sure the email and password are correct .",
       });
     }

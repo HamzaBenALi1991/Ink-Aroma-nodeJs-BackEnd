@@ -19,6 +19,7 @@ const BookRoutes =require('./Api/routes/book');
 const ReviewRoutes =require('./Api/routes/review')
 const emailRoutes = require('./Api/routes/EmailApi')
 const UploadRoutes =require('./Api/routes/fileApi')
+const forgetpass = require('./Api/routes/forgetpasswordApi')
 
 
 // stting up mongoose connect 
@@ -59,6 +60,7 @@ app.use('/',BookRoutes);
 app.use('/',ReviewRoutes) ;
 app.use('/users/mail' , emailRoutes)
 app.use('/', UploadRoutes)
+app.use('/', forgetpass)
 
 // handlying all wrong routes  :
 
