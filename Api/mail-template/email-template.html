@@ -1,0 +1,58 @@
+!<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title></title>
+    <style>
+      b {
+        color: red;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div>
+      <img src="https://see.fontimg.com/api/renderfont4/dJnR/eyJyIjoiZnMiLCJoIjo2NSwidyI6MTAwMCwiZnMiOjY1LCJmZ2MiOiIjMDAwMDAwIiwiYmdjIjoiI0ZGRkZGRiIsInQiOjF9/SW5rLUFyb21h/merry-christmas-star.png" alt="">
+    </div>
+    <h1>Greating  <%= name%>,</h1>
+
+    <p>
+      We've received a request to set a new password for this  account: 
+      <%= email %>,
+    </p>
+    <br />
+
+    <a
+    class="btn btn-success"
+      href="http://localhost:4200/#/resetpassword/<%= token %>"
+      style="
+        box-sizing: border-box;
+        border-radius: 3px;
+        border-width: 0;
+        border: none;
+        display: inline-flex;
+        font-style: normal;
+        font-size: inherit;
+        height: 2.28571429em;
+        line-height: 2.28571429em;
+        margin: 0;
+        outline: none;
+        padding: 0 12px;
+        text-align: center;
+        vertical-align: middle;
+        white-space: nowrap;
+        text-decoration: none;
+        background: #0052cc;
+        color: #ffffff;
+      "
+      >Set new  password</a
+    >
+
+    <br />
+    <span style="color: #5e6c84"
+      >If you didn't ask for such request , you can safely ignore this email.</span
+    >
+  </body>
+</html>

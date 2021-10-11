@@ -17,7 +17,6 @@ require('dotenv').config()
 const UserRoutes = require("./Api/routes/user");
 const BookRoutes =require('./Api/routes/book');
 const ReviewRoutes =require('./Api/routes/review')
-const emailRoutes = require('./Api/routes/EmailApi')
 const UploadRoutes =require('./Api/routes/fileApi')
 const forgetpass = require('./Api/routes/forgetpasswordApi')
 
@@ -58,7 +57,6 @@ app.use( "/uploads", express.static("uploads"));
 app.use("/", UserRoutes);
 app.use('/',BookRoutes); 
 app.use('/',ReviewRoutes) ;
-app.use('/users/mail' , emailRoutes)
 app.use('/', UploadRoutes)
 app.use('/', forgetpass)
 
