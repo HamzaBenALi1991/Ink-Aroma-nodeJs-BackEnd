@@ -7,7 +7,7 @@ const fs = require("fs");
 const ejs = require("ejs");
 const jwt = require("jsonwebtoken");
 const _ = require("lodash");
-
+const bcrypt = require("bcrypt");
 const router = express.Router();
 // set up
 const transporter = nodemailer.createTransport({
@@ -27,13 +27,13 @@ router.put("/forgetEmail", async (req, res) => {
       });
     }
     const email = user.email;
-    const token = jwt.sign({ _Id: user._id }, process.env.JWT_SECRET, {
+    const token = jwt.sign({ _Id: user.email }, process.env.JWT_SECRET, {
       expiresIn: process.env.JWT_EXPIRE,
     });
     const name = user.pseudo;
     // 1. read template path
     const templatePath = path.resolve(
-      "/home/hamza/Desktop/Final project /BackEnd/Api/mail-template/",
+      "./Api/mail-template",
       "email-template.html"
     );
 
@@ -67,23 +67,31 @@ router.put("/forgetEmail", async (req, res) => {
   }
 });
 
-router.post("/resetpassword", async (req, res) => {
-  const { resetlink, newPass } = req.body;
+router.put("/resetpassword", async (req, res) => {
+  const resetlink = req.body.resetLink;
+  const newPass = req.body.password;
+
   try {
     if (resetlink) {
       jwt.verify(
         resetlink,
-        process.env.RESET_PASSWORD_KEY,
+        process.env.JWT_SECRET,
         async (err, decodedData) => {
+          console.log(decodedData);
           if (err) {
-            res.status(400).json({ message: "invalid token , please try again " });
+            res
+              .status(400)
+              .json({ message: "invalid token , please try again " });
           }
-          const user = await User.findOne({ resetlink });
-
           const hashedPwd = await bcrypt.hash(newPass, 10);
-          user.password = hashedPwd;
-          user.resetlink = "";
-          await user.save();
+
+          const user = await User.findOneAndUpdate(
+            { email : decodedData._Id },
+            {
+              password: hashedPwd,
+            }
+          );
+          console.log(user);
           res.status(200).json({ message: "your password has been changed" });
         }
       );
