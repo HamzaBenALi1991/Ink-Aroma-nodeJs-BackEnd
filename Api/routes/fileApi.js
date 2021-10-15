@@ -1,10 +1,12 @@
 const express =require('express') ; 
 const router = express.Router();
-const uploads =require('../../controllers/imagecontroller')
+const uploads =require('../../controllers/imagecontroller'); 
+const fs = require('fs')
 
 // multer needed packages
 const multer = require("multer");
 const path = require("path");
+const { Router } = require('express');
 
 // multer configuration
 const my_storage = multer.diskStorage({
@@ -21,14 +23,14 @@ const my_storage = multer.diskStorage({
     },
     limits: {
       // taille max image
-      fileSize: 1024 * 1024,
+      fileSize: 200000000,
     },
   });
   
   // file filter function
   const fileFilterFunction = (req, file, cb) => {
     const file_extention = path.extname(file.originalname);
-    const allowedExtentions = [".jpg", ".jpeg", ".png", ".gif"];
+    const allowedExtentions = [".jpg", ".jpeg", ".png", ".gif" ,".JPG"];
     if (!allowedExtentions.includes(file_extention)) {
       return cb(new Error("Only images are allowed"));
     }
@@ -38,7 +40,11 @@ const my_storage = multer.diskStorage({
   const upload = multer({ storage: my_storage, fileFilter: fileFilterFunction });
 
   router.post('/upload/:id' ,upload.single("file") ,uploads.upload);
-  
+
+  router.get("/sentImage" , uploads.getImage)
+
+  router.get('/image' , uploads.try)
+
   module.exports = router;
 
   

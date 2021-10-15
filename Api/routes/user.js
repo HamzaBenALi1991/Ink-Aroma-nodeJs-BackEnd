@@ -12,14 +12,14 @@ const passport = require("passport");
 // get all users request  :
 router.get(
   "/users",
-  // passport.authenticate("bearer", { session: false }),
+  passport.authenticate("bearer", { session: false }),
   UserControllers.getall
 );
 
 // get user by Id
 router.get(
   "/user/:id",
-  // passport.authenticate("bearer", { session: false }),
+  passport.authenticate("bearer", { session: false }),
   UserControllers.getOneById
 );
 
@@ -57,5 +57,7 @@ router.put(
 
 // login
 router.post("/login", UserControllers.login);
+
+router.put("/changepassword/:id" , UserControllers.editpassword)
 
 module.exports = router;

@@ -8,8 +8,7 @@ const fs = require("fs");
 // for hashing password
 const bcrypt = require("bcrypt");
 
-
-// login controller 
+// login controller
 exports.login = async (req, res) => {
   try {
     const user = await User.findOne({ email: req.body.email });
@@ -31,6 +30,7 @@ exports.login = async (req, res) => {
         res.status(200).json({
           message: "Login Succeded . ",
           token: token,
+          _Id: user._id,
         });
       } else {
         res.status(403).json({
@@ -49,7 +49,7 @@ exports.login = async (req, res) => {
   }
 };
 
-// register controller 
+// register controller
 exports.register = async (req, res) => {
   try {
     const hash = await bcrypt.hash(req.body.password, 10);
@@ -58,36 +58,34 @@ exports.register = async (req, res) => {
       // in case find return nothing its not null ot empty array
       res.status(409).json("Email alreadt exist");
     } else {
-        const user = await User.create({
-          pseudo: req.body.pseudo,
-          firstname: req.body.firstname,
-          lastname: req.body.lastname,
-          email: req.body.email,
-          password: hash,
-          age: req.body.age,
-          country: req.body.country,
-          city: req.body.city,
-          phone: req.body.phone,
-          favoritbooks: req.body.favoritbooks,
-          addedbooks: req.body.addedbooks,
-          reviews: req.body.reviews,
-        });
-        res.status(200).json({
-          user: user,
-        });
-      
+      const user = await User.create({
+        pseudo: req.body.pseudo,
+        firstname: req.body.firstname,
+        lastname: req.body.lastname,
+        email: req.body.email,
+        password: hash,
+        age: req.body.age,
+        country: req.body.country,
+        city: req.body.city,
+        phone: req.body.phone,
+        favoritbooks: req.body.favoritbooks,
+        addedbooks: req.body.addedbooks,
+        reviews: req.body.reviews,
+      });
+      res.status(200).json({
+        user: user,
+      });
     }
   } catch (error) {
-    console.log(error)
+    console.log(error);
     res.status(500).json({
       message: error.message,
     });
   }
 };
-// get all user controllers 
-exports.getall =  async (req, res) => {
+// get all user controllers
+exports.getall = async (req, res) => {
   try {
-
     const users = await User.find({});
     res.status(200).send(users);
   } catch (error) {
@@ -95,18 +93,15 @@ exports.getall =  async (req, res) => {
     res.status(500).json({ message: "Internal server error!" });
   }
 };
-// get user byId controler 
-exports.getOneById =  async (req, res) => {
+// get user byId controler
+exports.getOneById = async (req, res) => {
   try {
     const user = await User.findById(req.params.id).populate(
       "favoritbooks reviews"
     );
     if (user) {
       // checking if the Id is valid
-      res.json({
-        user: user,
-        url: "http://localhost:3000/users/" + user._id,
-      });
+      res.status(200).json(user);
     } else {
       // response if the Id is not valid
       res.status(404).json({
@@ -119,8 +114,8 @@ exports.getOneById =  async (req, res) => {
       message: error.message,
     });
   }
-}; 
-// delete user controler 
+};
+// delete user controler
 exports.delete = async (req, res) => {
   try {
     const user = await User.findByIdAndRemove(req.params.id);
@@ -137,12 +132,14 @@ exports.delete = async (req, res) => {
   }
 };
 
-// update one byId controller 
-exports.update =   async (req, res) => {
+// update one byId controller
+exports.update = async (req, res) => {
   try {
-    const hash = await bcrypt.hash(req.body.password, 10);
     const olduser = await User.findById(req.params.id);
-    if (olduser && req.file) {
+    console.log(olduser);
+    // const hash = await bcrypt.hash(req.body.password, 10);
+
+    if (olduser) {
       const user = await User.findByIdAndUpdate(
         req.params.id,
         {
@@ -150,40 +147,6 @@ exports.update =   async (req, res) => {
           firstname: req.body.firstname,
           lastname: req.body.lastname,
           email: req.body.email,
-          password: hash,
-          age: req.body.age,
-          country: req.body.country,
-          city: req.body.city,
-          phone: req.body.phone,
-          image: req.file.path,
-          favoritbooks: req.body.favoritbooks,
-          addedbooks: req.body.addedbooks,
-          reviews: req.body.reviews,
-        },
-        {
-          new: true,
-        }
-      );
-      // this is for removing old image after updating
-      try {
-        fs.unlinkSync(olduser.image);
-        //file removed
-      } catch (err) {
-        console.error(err);
-      }
-      res.json({
-        message: "user has been updated .",
-        newUserInfos: user,
-      });
-    } else if (olduser && req.file == undefined) {
-      const user = await User.findByIdAndUpdate(
-        req.params.id,
-        {
-          pseudo: req.body.pseudo,
-          firstname: req.body.firstname,
-          lastname: req.body.lastname,
-          email: req.body.email,
-          password: hash,
           age: req.body.age,
           country: req.body.country,
           city: req.body.city,
@@ -206,12 +169,12 @@ exports.update =   async (req, res) => {
       });
     }
   } catch (error) {
-    res.status(500).json({ message: error.message});
+    res.status(500).json({ message: error.message });
   }
 };
 
 // affect a favour book to a user using book Id conroller
-exports.affectFavBook =  async (req, res) => {
+exports.affectFavBook = async (req, res) => {
   try {
     await User.findByIdAndUpdate(
       req.user.id,
@@ -228,8 +191,8 @@ exports.affectFavBook =  async (req, res) => {
     res.status(500).json({ message: "Internal server error!" });
   }
 };
-// désaffact fav book from user controller 
-exports.removeFavBook =  async (req, res) => {
+// désaffact fav book from user controller
+exports.removeFavBook = async (req, res) => {
   try {
     await User.findByIdAndUpdate(
       req.params.iduser,
@@ -247,4 +210,16 @@ exports.removeFavBook =  async (req, res) => {
   }
 };
 
-
+exports.editpassword = async (req, res) => {
+  try {
+    const hash = await bcrypt.hash(req.body.password, 10);
+    const user = await User.findByIdAndUpdate(req.params.id, {
+      password: hash
+    });
+    res.status(200).json({
+      message: "Password has been updated .",
+    });
+  } catch (error) {
+    res.status(500).json(error.message);
+  }
+};

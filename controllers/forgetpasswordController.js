@@ -14,7 +14,7 @@ exports.resetlink = async (req, res) => {
     const user = await User.findOne({ email: req.body.email });
     if (!user) {
       return res.status(404).json({
-        message:
+        message :
           "email does not exist. please make sure it's the  correcte email adress .",
       });
     }
