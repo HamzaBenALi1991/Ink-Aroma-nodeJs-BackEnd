@@ -3,25 +3,23 @@ const express = require("express");
 const app = express();
 const morgan = require("morgan");
 const bodyparser = require("body-parser");
-const mongoose =require('mongoose')
-const cors =require("cors")
-// bearer strategie  with passport 
-require('./passport/bearerStrategie')
-// dotenv config 
-require('dotenv').config()
-
-
+const mongoose = require("mongoose");
+const cors = require("cors");
+const path =require("path")
+// bearer strategie  with passport
+require("./passport/bearerStrategie");
+// dotenv config
+require("dotenv").config();
 
 
 // importing routes
 const UserRoutes = require("./Api/routes/user");
-const BookRoutes =require('./Api/routes/book');
-const ReviewRoutes =require('./Api/routes/review')
-const UploadRoutes =require('./Api/routes/fileApi')
-const forgetpass = require('./Api/routes/forgetpasswordApi')
+const BookRoutes = require("./Api/routes/book");
+const ReviewRoutes = require("./Api/routes/review");
+const UploadRoutes = require("./Api/routes/fileApi");
+const forgetpass = require("./Api/routes/forgetpasswordApi");
 
-
-// stting up mongoose connect 
+// stting up mongoose connect
 const options = {
   useNewUrlParser: true,
   useUnifiedTopology: true,
@@ -50,15 +48,16 @@ app.use(
 // CORS handlying
 app.use(cors());
 
-// making uploads public 
-app.use( "/uploads", express.static("uploads"));
+// making uploads public
+app.use("/uploads", express.static("uploads"));
+app.use("/images", express.static(path.join("images")));
 
 // routes that handls requests
 app.use("/", UserRoutes);
-app.use('/',BookRoutes); 
-app.use('/',ReviewRoutes) ;
-app.use('/', UploadRoutes)
-app.use('/', forgetpass)
+app.use("/", BookRoutes);
+app.use("/", ReviewRoutes);
+app.use("/", UploadRoutes);
+app.use("/", forgetpass);
 
 // handlying all wrong routes  :
 

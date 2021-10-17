@@ -2,7 +2,7 @@
 const jwt = require("jsonwebtoken");
 // importing User schema
 const User = require("../Api/models/userschema");
-
+const path = require("path");
 // needed for removing file after update
 const fs = require("fs");
 // for hashing password
@@ -214,12 +214,57 @@ exports.editpassword = async (req, res) => {
   try {
     const hash = await bcrypt.hash(req.body.password, 10);
     const user = await User.findByIdAndUpdate(req.params.id, {
-      password: hash
+      password: hash,
     });
     res.status(200).json({
       message: "Password has been updated .",
     });
   } catch (error) {
     res.status(500).json(error.message);
+  }
+};
+exports.createuser2 = async (req, res) => {
+  try {
+    let { user } = req.body;
+    user = JSON.parse(JSON.parse(JSON.stringify(user)));
+    const exist = await User.find({ email: user.email });
+    if (exist.length > 0) {
+      if (req.file) {
+        // this feild reserved for later for removing image already saved
+        const imagePath = req.file.filename; // Note: set path dynamically
+        console.log(imagePath);
+        fs.unlinkSync("uploads/users/" + req.file.filename);
+
+        // in case find return nothing its not null ot empty array
+        res.status(409).json("Email already exist");
+      } else {
+        // in case find return nothing its not null ot empty array
+        res.status(409).json("Email already exist");
+      }
+    } else {
+      // in case image uploaled
+      if (req.file) {
+        const imagePath = req.file.filename;
+        const hash = await bcrypt.hash(user.password, 10);
+        user.password = hash;
+        user.image = imagePath;
+
+        const createdProfile = await User.create(user);
+        res.status(201).json(createdProfile);
+      } else {
+        // in case no image
+        const hash = await bcrypt.hash(user.password, 10);
+        user.password = hash;
+        // set defautl image
+        const imagePath = "http://localhost:3000/uploads/users/download.jpeg"; // Note: set path dynamically
+        user.image = imagePath;
+        const createdProfile = await User.create(user);
+        res.status(201).json(createdProfile);
+      }
+    }
+  } catch (error) {
+    res.status(500).json({
+      message: "internal Servor erreur.",
+    });
   }
 };

@@ -6,6 +6,37 @@ const UserControllers = require("../../controllers/userControllers");
 
 // passport
 const passport = require("passport");
+// multer needed packages
+const multer = require("multer");
+const path = require("path");
+const { Router } = require('express');
+
+// multer configuration
+const my_storage = multer.diskStorage({
+    destination: (req, file, cb) => {
+      // where images will be stored
+      cb(null, "./uploads/users/");
+    },
+  
+    filename: (req, file, cb) => {
+      // under what name will the image be saved
+      const file_extention = path.extname(file.originalname);
+      const uniqueSuffix = Date.now() + file_extention;
+      cb(null, file.originalname + "-" + uniqueSuffix);
+    },
+    limits: {
+      // taille max image
+      fileSize: 200000000,
+    },
+  });
+  
+  // file filter function
+  const fileFilterFunction = (req, file, cb) => {
+    const allowedMimeTypes = ['image/png', 'image/jpeg', 'image/jpg'];
+    allowedMimeTypes.includes(file.mimetype) ? cb(null, true) : cb(null, false);
+  };
+  // 2.0 create upload
+  const upload = multer({ storage: my_storage, fileFilter: fileFilterFunction });
 
 
 
@@ -24,7 +55,7 @@ router.get(
 );
 
 // create a user or Register
-router.post("/newuser",  UserControllers.register);
+router.post("/newuser", upload.single("image") ,  UserControllers.createuser2);
 
 // update user
 router.put(
