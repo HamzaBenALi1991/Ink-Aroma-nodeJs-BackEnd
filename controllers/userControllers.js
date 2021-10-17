@@ -8,6 +8,8 @@ const fs = require("fs");
 // for hashing password
 const bcrypt = require("bcrypt");
 
+
+
 // login controller
 exports.login = async (req, res) => {
   try {
@@ -43,41 +45,6 @@ exports.login = async (req, res) => {
       });
     }
   } catch (error) {
-    res.status(500).json({
-      message: error.message,
-    });
-  }
-};
-
-// register controller
-exports.register = async (req, res) => {
-  try {
-    const hash = await bcrypt.hash(req.body.password, 10);
-    const exist = await User.find({ email: req.body.email });
-    if (exist.length > 0) {
-      // in case find return nothing its not null ot empty array
-      res.status(409).json("Email alreadt exist");
-    } else {
-      const user = await User.create({
-        pseudo: req.body.pseudo,
-        firstname: req.body.firstname,
-        lastname: req.body.lastname,
-        email: req.body.email,
-        password: hash,
-        age: req.body.age,
-        country: req.body.country,
-        city: req.body.city,
-        phone: req.body.phone,
-        favoritbooks: req.body.favoritbooks,
-        addedbooks: req.body.addedbooks,
-        reviews: req.body.reviews,
-      });
-      res.status(200).json({
-        user: user,
-      });
-    }
-  } catch (error) {
-    console.log(error);
     res.status(500).json({
       message: error.message,
     });
@@ -138,7 +105,6 @@ exports.update = async (req, res) => {
     const olduser = await User.findById(req.params.id);
     console.log(olduser);
     // const hash = await bcrypt.hash(req.body.password, 10);
-
     if (olduser) {
       const user = await User.findByIdAndUpdate(
         req.params.id,

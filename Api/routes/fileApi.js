@@ -39,11 +39,8 @@ const my_storage = multer.diskStorage({
   // 2.0 create upload
   const upload = multer({ storage: my_storage, fileFilter: fileFilterFunction });
 
-  router.post('/upload/:id' ,upload.single("file") ,uploads.upload);
+  router.put('/upload/:id' ,upload.single("file") ,uploads.upload);
 
-  router.get("/sentImage" , uploads.getImage)
-
-  router.get('/image' , uploads.try)
 
   module.exports = router;
 
