@@ -6,9 +6,7 @@ const Book = require("../Api/models/bookSchema");
 exports.getall = async (req, res) => {
   try {
     const books = await Book.find({});
-    res.status(200).json({
-      books: books,
-    });
+    res.status(200).json(books);
   } catch (error) {
     console.log(error);
     res.status(500).json({ message: "Internal server error!" });
@@ -131,11 +129,10 @@ exports.createBook = async (req, res) => {
     const exist = await Book.find({ title: book.title });
     if (exist.length > 0) {
       if (req.file) {
-        if (book.bookover != 'http://localhost:3000/uploads/books/generic.jpg' ) {
                    // this feild reserved for later for removing image already saved
         const imagePath = req.file.filename; // Note: set path dynamically
         fs.unlinkSync("uploads/books/" +imagePath);
-        } 
+        
 
         // in case find return nothing its not null ot empty array
         res.status(409).json("This Book  already exist");
@@ -149,7 +146,7 @@ exports.createBook = async (req, res) => {
         const createdBook = await Book.create(book);
         res.status(201).json(createdBook);
       } else {
-        const imagePath = "http://localhost:3000/uploads/books/generic.jpg "; // Note: set path dynamically
+        const imagePath = "http://localhost:3000/uploads/books/generic.jpg"; // Note: set path dynamically
         book.bookCover = imagePath;
         const createdBook = await Book.create(book);
         res.status(201).json(createdBook);

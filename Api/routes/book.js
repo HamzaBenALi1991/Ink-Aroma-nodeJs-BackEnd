@@ -20,7 +20,7 @@ const my_storage = multer.diskStorage({
   },
   limits: {
     // taille max image
-    fileSize: 1024 * 1024,
+    fileSize: 1024*1024,
   },
 });
 
@@ -55,7 +55,7 @@ router.get(
 router.post(
   "/newbook",
   [
-    // passport.authenticate("bearer", { session: false }),
+    passport.authenticate("bearer", { session: false }),
     upload.single("bookCover"),
   ],
   bookControllers.createBook
