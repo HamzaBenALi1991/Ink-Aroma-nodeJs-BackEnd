@@ -16,7 +16,7 @@ const my_storage = multer.diskStorage({
     // under what name will the image be saved
     const file_extention = path.extname(file.originalname);
     const uniqueSuffix = Date.now() + file_extention;
-    cb(null, file.fieldname + "-" + uniqueSuffix);
+    cb(null, file.originalname + "-" + uniqueSuffix);
   },
   limits: {
     // taille max image
@@ -55,7 +55,7 @@ router.get(
 router.post(
   "/newbook",
   [
-    passport.authenticate("bearer", { session: false }),
+    // passport.authenticate("bearer", { session: false }),
     upload.single("bookCover"),
   ],
   bookControllers.createBook

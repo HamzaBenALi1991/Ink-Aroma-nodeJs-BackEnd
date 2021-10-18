@@ -198,8 +198,7 @@ exports.createuser2 = async (req, res) => {
       if (req.file) {
         // this feild reserved for later for removing image already saved
         const imagePath = req.file.filename; // Note: set path dynamically
-        console.log(imagePath);
-        fs.unlinkSync("uploads/users/" + req.file.filename);
+        fs.unlinkSync("uploads/users/" + imagePath);
 
         // in case find return nothing its not null ot empty array
         res.status(409).json("Email already exist");

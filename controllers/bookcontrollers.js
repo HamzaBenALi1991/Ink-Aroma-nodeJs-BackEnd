@@ -2,9 +2,6 @@ const fs = require("fs");
 const User = require("../Api/models/userschema");
 const Book = require("../Api/models/bookSchema");
 
-
-
-
 // get all book controller
 exports.getall = async (req, res) => {
   try {
@@ -54,7 +51,7 @@ exports.update = async (req, res) => {
           reviews: req.body.reviews,
           bookScore: req.body.bookScore,
           bookCover: req.file.path,
-          categorie : req.body.categorie
+          categorie: req.body.categorie,
         },
         {
           new: true,
@@ -81,7 +78,7 @@ exports.update = async (req, res) => {
           description: req.body.description,
           reviews: req.body.reviews,
           bookScore: req.body.bookScore,
-          categorie : req.body.categorie
+          categorie: req.body.categorie,
         },
         {
           new: true,
@@ -129,48 +126,34 @@ exports.delete = async (req, res) => {
 // creating new book
 exports.createBook = async (req, res) => {
   try {
-    if (req.file) {
-      const book = await Book.create({
-        title: req.body.title,
-        author: req.body.author,
-        description: req.body.description,
-        reviews: req.body.reviews,
-        bookScore: req.body.bookScore,
-        bookCover: req.file.path,
-        categorie : req.body.categorie
-      });
-      res.status(200).json({
-        book: book,
-      });
-      // adding book id to user addedbook
-      await User.findByIdAndUpdate(
-        req.user.id,
-        { $push: { addedbooks: book._id } },
-        {
-          new: true,
-        }
-      );
-    } else {
-      // multer does not allow no file req operation in case the user did not choose a picture
-      const book = await Book.create({
-        title: req.body.title,
-        author: req.body.author,
-        description: req.body.description,
-        reviews: req.body.reviews,
-        bookScore: req.body.bookScore,
-      });
-      // adding book id to user addedbook
+    let { book } = req.body;
+    book = JSON.parse(JSON.parse(JSON.stringify(book)));
+    const exist = await Book.find({ title: book.title });
+    if (exist.length > 0) {
+      if (req.file) {
+        if (book.bookover != 'http://localhost:3000/uploads/books/generic.jpg' ) {
+                   // this feild reserved for later for removing image already saved
+        const imagePath = req.file.filename; // Note: set path dynamically
+        fs.unlinkSync("uploads/books/" +imagePath);
+        } 
 
-      await User.findByIdAndUpdate(
-        req.user.id,
-        { $push: { addedbooks: book._id } },
-        {
-          new: true,
-        }
-      );
-      res.status(200).json({
-        book: book,
-      });
+        // in case find return nothing its not null ot empty array
+        res.status(409).json("This Book  already exist");
+      } else {
+        res.status(409).json("This Book  already exist");
+      }
+    } else {
+      if (req.file) {
+        const imagePath = req.file.filename;
+        book.bookCover = imagePath;
+        const createdBook = await Book.create(book);
+        res.status(201).json(createdBook);
+      } else {
+        const imagePath = "http://localhost:3000/uploads/books/generic.jpg "; // Note: set path dynamically
+        book.bookCover = imagePath;
+        const createdBook = await Book.create(book);
+        res.status(201).json(createdBook);
+      }
     }
   } catch (error) {
     res.status(500).json({
@@ -178,36 +161,35 @@ exports.createBook = async (req, res) => {
     });
   }
 };
-// affect review to book controller 
-exports.affectReview  =async (req, res) => {
-    try {
-      const book = await Book.findByIdAndUpdate(
-        req.params.idbook,
-        { $push: { reviews: req.params.idreview } },
-        {
-          new: true,
-        }
-      );
-      res.json(book);
-    } catch (error) {
-      console.log(error);
-      res.status(500).json({ message: "Internal server error!" });
-    }
-  };
-  // desaffect review from book controller 
-exports.desaffectReview =  async (req, res) => {
-    try {
-      const book = await Book.findByIdAndUpdate(
-        req.params.idbook,
-        { $pull: { reviews: req.params.idreview } },
-        {
-          new: true,
-        }
-      );
-      res.json(book);
-    } catch (error) {
-      console.log(error);
-      res.status(500).json({ message: "Internal server error!" });
-    }
-  };  
-
+// affect review to book controller
+exports.affectReview = async (req, res) => {
+  try {
+    const book = await Book.findByIdAndUpdate(
+      req.params.idbook,
+      { $push: { reviews: req.params.idreview } },
+      {
+        new: true,
+      }
+    );
+    res.json(book);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Internal server error!" });
+  }
+};
+// desaffect review from book controller
+exports.desaffectReview = async (req, res) => {
+  try {
+    const book = await Book.findByIdAndUpdate(
+      req.params.idbook,
+      { $pull: { reviews: req.params.idreview } },
+      {
+        new: true,
+      }
+    );
+    res.json(book);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Internal server error!" });
+  }
+};
