@@ -8,7 +8,7 @@ const bookSchema = mongoose.Schema(
     bookCover: {type : String , required :false },
     description: {type : String , required :true },
     reviews: [{ type: mongoose.Schema.Types.ObjectId, ref: "Review" }],
-    BookScore: {type : Number , required :false , default : -1 },
+    BookScore: {type : Number , required :false , default : 5 },
     categorie : { type :String  , required : true },
     user : { type : mongoose.Schema.Types.ObjectId, ref : "Users"}
   },

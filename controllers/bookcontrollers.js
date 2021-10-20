@@ -18,9 +18,7 @@ exports.getOnebyId = async (req, res) => {
     const book = await Book.findById(req.params.id).populate("reviews");
     if (book) {
       // checking if the Id is valid
-      res.json({
-        book: book,
-      });
+      res.json(book);
     } else {
       // response if the Id is not valid
       res.status(404).json({
