@@ -142,6 +142,13 @@ exports.createBook = async (req, res) => {
         const imagePath = req.file.filename;
         book.bookCover = imagePath;
         const createdBook = await Book.create(book);
+        await User.findByIdAndUpdate(
+          req.user.id,
+          { $push: { addedbooks: createdBook._id } },
+          {
+            new: true,
+          }
+        );
         res.status(201).json(createdBook);
       } else {
         const imagePath = "http://localhost:3000/uploads/books/generic.jpg"; // Note: set path dynamically
