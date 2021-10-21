@@ -1,5 +1,6 @@
 const Reviews = require("../Api/models/review");
 const User = require("../Api/models/userschema");
+const Book = require('../Api/models/bookSchema')
 
 exports.getall = async (req, res) => {
   try {
@@ -16,8 +17,9 @@ exports.getall = async (req, res) => {
 // create a new review + adding the review Id to the user reviews array
 exports.createRev = async (req, res) => {
   try {
+    // create the review and saving it 
     const review = await Reviews.create(req.body);
-    //adding the review Id to the user reviews
+    //adding the review Id to the user.reviews
     await User.findByIdAndUpdate(
       req.user.id,
       { $push: { reviews: review.id } },
@@ -25,9 +27,15 @@ exports.createRev = async (req, res) => {
         new: true,
       }
     );
-    res.status(200).json({
-      review: review,
-    });
+    //adding review Id to book.reviews
+    const book = await Book.findByIdAndUpdate(
+      req.body.book,
+      { $push: { reviews: review.id } },
+      {
+        new: true,
+      }
+    );
+    res.status(200).json(review);
   } catch (error) {
     res.status(500).json({
       message: error.message,

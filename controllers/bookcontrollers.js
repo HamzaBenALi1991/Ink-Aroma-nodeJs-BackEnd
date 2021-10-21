@@ -157,6 +157,7 @@ exports.createBook = async (req, res) => {
   }
 };
 // affect review to book controller
+// not needed anymore this is for clean up 
 exports.affectReview = async (req, res) => {
   try {
     const book = await Book.findByIdAndUpdate(
