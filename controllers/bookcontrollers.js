@@ -43,7 +43,6 @@ exports.update = async (req, res) => {
       });
       res.json({
         message: "book has been updated .",
-        newBookInfos: book,
       });
     } else {
       res.status(404).json({
