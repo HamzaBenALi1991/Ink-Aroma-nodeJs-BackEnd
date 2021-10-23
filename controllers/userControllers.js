@@ -7,8 +7,8 @@ const path = require("path");
 const fs = require("fs");
 // for hashing password
 const bcrypt = require("bcrypt");
-
-
+const Review = require("../Api/models/review");
+const Book = require("../Api/models/bookSchema");
 
 // login controller
 exports.login = async (req, res) => {
@@ -64,7 +64,7 @@ exports.getall = async (req, res) => {
 exports.getOneById = async (req, res) => {
   try {
     const user = await User.findById(req.params.id).populate(
-      "favoritbooks reviews"
+      "favoritbooks addedbooks reviews"
     );
     if (user) {
       // checking if the Id is valid
@@ -85,8 +85,28 @@ exports.getOneById = async (req, res) => {
 // delete user controler
 exports.delete = async (req, res) => {
   try {
-    const user = await User.findByIdAndRemove(req.params.id);
+    const user = await User.findById(req.params.id);
     if (user) {
+      const reviewedId = [];
+      // remove user.Reviews from book.Reviews and delete all user.review
+      for (let i = 0; i < user.reviews.length; i++) {
+        reviewedId.push(user.reviews[i]);
+      }
+      console.log(reviewedId);
+      for (let j = 0; j < reviewedId.length; j++) {
+        const review = await Review.findById(reviewedId[j])  ;
+       // remove user.Reviews from book.Reviews
+         await Book.findByIdAndUpdate(
+          review.book ,
+          { $pull: { reviews: reviewedId[j] } },
+          {
+            new: true,
+          }
+        );
+         await Review.findByIdAndRemove(reviewedId[j]);
+         await User.findByIdAndRemove(req.params.id);
+
+      }
       res.json({ message: "User been deleted successfully" });
     } else {
       res.status(404).json({
