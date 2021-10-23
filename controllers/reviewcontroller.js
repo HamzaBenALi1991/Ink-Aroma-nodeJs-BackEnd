@@ -6,9 +6,7 @@ exports.getall = async (req, res) => {
   try {
     const reviews = await Reviews.find({}).populate("user book");
     console.log();
-    res.status(200).json({
-      reviews: reviews,
-    });
+    res.status(200).json(reviews);
   } catch (error) {
     console.log(error);
     res.status(500).json({ message: "Internal server error!" });
@@ -45,9 +43,9 @@ exports.createRev = async (req, res) => {
 // delete review by Id + removing from user reviews array
 exports.delete = async (req, res) => {
   try {
-    const review = await Reviews.findByIdAndRemove(req.params.id);
+    const review = await Reviews.findById(req.params.id);
     if (review) {
-      //Remove review from user 
+      //Remove review from user
       await User.findByIdAndUpdate(
         req.user.id,
         { $pull: { reviews: review.id } },
@@ -57,13 +55,13 @@ exports.delete = async (req, res) => {
       );
       // remove review from book reviews
       await Book.findByIdAndUpdate(
-        req.user.id,
+        review.book._id,
         { $pull: { reviews: review.id } },
         {
           new: true,
         }
       );
-      
+
       res.json({ message: "Review been deleted successfully" });
     } else {
       res.status(404).json({
