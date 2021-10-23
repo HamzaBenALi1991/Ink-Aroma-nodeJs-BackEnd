@@ -1,6 +1,6 @@
 const Reviews = require("../Api/models/review");
 const User = require("../Api/models/userschema");
-const Book = require('../Api/models/bookSchema')
+const Book = require("../Api/models/bookSchema");
 
 exports.getall = async (req, res) => {
   try {
@@ -17,7 +17,7 @@ exports.getall = async (req, res) => {
 // create a new review + adding the review Id to the user reviews array
 exports.createRev = async (req, res) => {
   try {
-    // create the review and saving it 
+    // create the review and saving it
     const review = await Reviews.create(req.body);
     //adding the review Id to the user.reviews
     await User.findByIdAndUpdate(
@@ -47,6 +47,7 @@ exports.delete = async (req, res) => {
   try {
     const review = await Reviews.findByIdAndRemove(req.params.id);
     if (review) {
+      //Remove review from user 
       await User.findByIdAndUpdate(
         req.user.id,
         { $pull: { reviews: review.id } },
@@ -54,6 +55,15 @@ exports.delete = async (req, res) => {
           new: true,
         }
       );
+      // remove review from book reviews
+      await Book.findByIdAndUpdate(
+        req.user.id,
+        { $pull: { reviews: review.id } },
+        {
+          new: true,
+        }
+      );
+      
       res.json({ message: "Review been deleted successfully" });
     } else {
       res.status(404).json({
@@ -91,12 +101,10 @@ exports.update = async (req, res) => {
 // get review by Id controller
 exports.getRevbyId = async (req, res) => {
   try {
-    const review = await Reviews.findById(req.params.id).populate("user book");
+    const review = await Reviews.findById(req.params.id).populate("user");
     if (review) {
       // checking if the Id is valid
-      res.json({
-        review: review,
-      });
+      res.json(review);
     } else {
       // response if the Id is not valid
       res.status(404).json({

@@ -1,5 +1,6 @@
 const Book = require("../Api/models/bookSchema");
-const fs =require('fs')
+const fs =require('fs'); 
+const User =require('../Api/models/userschema')
 
 exports.upload = async (req, res) => {
   try {
