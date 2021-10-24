@@ -71,23 +71,26 @@ exports.delete = async (req, res) => {
       );
       const reviewsId = [];
       //remove all books reviews and delete these review.id from user.review
-      for (let i = 0; i < book.reviews.length; i++) {
-        reviewsId.push(book.reviews[i]);
+      if (reviewsId.length > 0) {
+        for (let i = 0; i < book.reviews.length; i++) {
+          reviewsId.push(book.reviews[i]);
+        }
+        for (let j = 0; j < reviewsId.length; j++) {
+          const review = await Review.findById(reviewsId[j]);
+          // remove user.Reviews from book.Reviews
+          await User.findByIdAndUpdate(
+            review.user,
+            { $pull: { reviews: reviewsId[j] } },
+            {
+              new: true,
+            }
+          );
+          await Review.findByIdAndRemove(reviewsId[j]);
+        }
       }
-      for (let j = 0; j < reviewsId.length; j++) {
-        const review = await Review.findById(reviewsId[j]);
-        // remove user.Reviews from book.Reviews
-        await User.findByIdAndUpdate(
-          review.user,
-          { $pull: { reviews: reviewsId[j] } },
-          {
-            new: true,
-          }
-        );
-        await Review.findByIdAndRemove(reviewsId[j]);
-        await Book.findByIdAndRemove(req.params.id)
-        res.json({ message: "Book has been been deleted successfully" });
-      }
+      await Book.findByIdAndRemove(req.params.id);
+      res.json({ message: "Book has been been deleted successfully" });
+
     } else {
       res.status(404).json({
         message: "there is no book with this ID so you can delete it .",

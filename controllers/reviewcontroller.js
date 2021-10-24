@@ -61,6 +61,7 @@ exports.delete = async (req, res) => {
           new: true,
         }
       );
+      await Reviews.findByIdAndRemove(req.params.id)
 
       res.json({ message: "Review been deleted successfully" });
     } else {
