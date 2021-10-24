@@ -93,20 +93,25 @@ exports.delete = async (req, res) => {
         reviewedId.push(user.reviews[i]);
       }
       console.log(reviewedId);
-      for (let j = 0; j < reviewedId.length; j++) {
-        const review = await Review.findById(reviewedId[j])  ;
-       // remove user.Reviews from book.Reviews
-         await Book.findByIdAndUpdate(
-          review.book ,
-          { $pull: { reviews: reviewedId[j] } },
-          {
-            new: true,
-          }
-        );
-         await Review.findByIdAndRemove(reviewedId[j]);
-         await User.findByIdAndRemove(req.params.id);
-
+      if (reviewedId.length>0) {
+        for (let j = 0; j < reviewedId.length; j++) {
+          const review = await Review.findById(reviewedId[j])  ;
+         // remove user.Reviews from book.Reviews
+           await Book.findByIdAndUpdate(
+            review.book ,
+            { $pull: { reviews: reviewedId[j] } },
+            {
+              new: true,
+            }
+          );
+  
+           await Review.findByIdAndRemove(reviewedId[j]);
+       
+  
+        }
       }
+      fs.unlinkSync("uploads/users/" + user.image);
+      await User.findByIdAndRemove(req.params.id);
       res.json({ message: "User been deleted successfully" });
     } else {
       res.status(404).json({

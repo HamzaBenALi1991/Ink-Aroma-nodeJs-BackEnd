@@ -88,6 +88,7 @@ exports.delete = async (req, res) => {
           await Review.findByIdAndRemove(reviewsId[j]);
         }
       }
+      fs.unlinkSync("uploads/books/" + book.bookCover);
       await Book.findByIdAndRemove(req.params.id);
       res.json({ message: "Book has been been deleted successfully" });
 
