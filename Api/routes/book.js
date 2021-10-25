@@ -1,10 +1,10 @@
 const express = require("express");
-const { now } = require("mongoose");
 const router = express.Router();
 const multer = require("multer");
 const path = require("path");
-const fs = require("fs");
-const passport =require('passport')
+const passport = require("passport");
+// import book controllers
+const bookControllers = require("../../controllers/bookcontrollers");
 // multer configuration
 const my_storage = multer.diskStorage({
   destination: (req, file, cb) => {
@@ -16,11 +16,11 @@ const my_storage = multer.diskStorage({
     // under what name will the image be saved
     const file_extention = path.extname(file.originalname);
     const uniqueSuffix = Date.now() + file_extention;
-    cb(null, file.fieldname + "-" + uniqueSuffix);
+    cb(null, file.originalname + "-" + uniqueSuffix);
   },
   limits: {
     // taille max image
-    fileSize: 1024 * 1024,
+    fileSize: 1024*1024,
   },
 });
 
@@ -36,188 +36,56 @@ const fileFilterFunction = (req, file, cb) => {
 // 2.0 create upload
 const upload = multer({ storage: my_storage, fileFilter: fileFilterFunction });
 
-const Book = require("../models/bookSchema");
+
+
 
 // get all Books request  :
 router.get(
   "/books",
   passport.authenticate("bearer", { session: false }),
-  async (req, res) => {
-    try {
-      const books = await Book.find({});
-      res.status(200).json({
-        books: books,
-      });
-    } catch (error) {
-      console.log(error);
-      res.status(500).json({ message: "Internal server error!" });
-    }
-  }
+  bookControllers.getall
 );
 // get Book by Id
-router.get("/book/:id", async (req, res) => {
-  try {
-    const book = await Book.findById(req.params.id).populate("reviews");
-    if (book) {
-      // checking if the Id is valid
-      res.json({
-        book: book,
-      });
-    } else {
-      // response if the Id is not valid
-      res.status(404).json({
-        message: "there is no Book with this ID",
-      });
-    }
-  } catch (error) {
-    // catch block for different kind of error
-    res.status(500).json({
-      message: error.message,
-    });
-  }
-});
-// create a new Book
-router.post("/newbook", upload.single("bookCover"), async (req, res) => {
-  try {
-    if (req.file) {
-      const book = await Book.create({
-        title: req.body.title,
-        author: req.body.author,
-        description: req.body.description,
-        reviews: req.body.reviews,
-        bookScore: req.body.bookScore,
-        bookCover: req.file.path,
-      });
-      res.status(200).json({
-        book: book,
-      });
-    } else {
-      // multer does not allow no file req operation in case the user did not choose a picture
-      const book = await Book.create({
-        title: req.body.title,
-        author: req.body.author,
-        description: req.body.description,
-        reviews: req.body.reviews,
-        bookScore: req.body.bookScore,
-      });
-      res.status(200).json({
-        book: book,
-      });
-    }
-  } catch (error) {
-    res.status(500).json({
-      message: error.message,
-    });
-  }
-});
+router.get(
+  "/book/:id",
+  passport.authenticate("bearer", { session: false }),
+  bookControllers.getOnebyId
+);
+// create a new Book AND  affecting the book to the user AddedBooks
+router.post(
+  "/newbook",
+  [
+    passport.authenticate("bearer", { session: false }),
+    upload.single("bookCover"),
+  ],
+  bookControllers.createBook
+);
 // update book
-router.put("/book/:id", upload.single("bookCover"), async (req, res) => {
-  try {
-    const oldbook = await Book.findById(req.params.id);
-
-    if (oldbook && req.file) {
-      const book = await Book.findByIdAndUpdate(
-        req.params.id,
-        {
-          title: req.body.title,
-          author: req.body.author,
-          description: req.body.description,
-          reviews: req.body.reviews,
-          bookScore: req.body.bookScore,
-          bookCover: req.file.path,
-        },
-        {
-          new: true,
-        }
-      );
-      try {
-        // this is for removing old image after updating book image
-        fs.unlinkSync(oldbook.bookCover);
-        //file removed
-      } catch (err) {
-        console.error(err);
-      }
-      // checking if the book already exist or not
-      res.json({
-        message: "book has been updated .",
-        newBookInfos: book,
-      });
-    } else if (oldbook && req.file == undefined) {
-      const book = await Book.findByIdAndUpdate(
-        req.params.id,
-        {
-          title: req.body.title,
-          author: req.body.author,
-          description: req.body.description,
-          reviews: req.body.reviews,
-          bookScore: req.body.bookScore,
-        },
-        {
-          new: true,
-        }
-      );
-      res.json({
-        message: "book has been updated .",
-        newBookInfos: book,
-      });
-    } else {
-      res.status(404).json({
-        message:
-          " there is no book with this ID to update .please check ID again .",
-      });
-    }
-  } catch (error) {
-    console.log(error);
-    res.status(500).json({ message: "Internal server error!" });
-  }
-});
-// delete book by Id
-router.delete("/book/:id", async (req, res) => {
-  try {
-    const book = await Book.findByIdAndRemove(req.params.id);
-    if (book) {
-      res.json({ message: "Book been deleted successfully" });
-    } else {
-      res.status(404).json({
-        message: "there is no book with this ID so you can delete it .",
-      });
-    }
-  } catch (error) {
-    console.log(error);
-    res.status(500).json({ message: "Internal server error!" });
-  }
-});
+router.put(
+  "/book/:id",
+  [
+    passport.authenticate("bearer", { session: false }),
+    upload.single("bookCover"),
+  ],
+  bookControllers.update
+);
+// delete book by Id plus removing from user added books
+router.delete(
+  "/book/:id",
+  passport.authenticate("bearer", { session: false }),
+  bookControllers.delete
+);
 // affect a review
-router.put("/affect-review/:idbook/:idreview", async (req, res) => {
-  try {
-    const book = await Book.findByIdAndUpdate(
-      req.params.idbook,
-      { $push: { reviews: req.params.idreview } },
-      {
-        new: true,
-      }
-    );
-    res.json(book);
-  } catch (error) {
-    console.log(error);
-    res.status(500).json({ message: "Internal server error!" });
-  }
-});
+router.put(
+  "/affect-review/:idbook/:idreview",
+  passport.authenticate("bearer", { session: false }),
+  bookControllers.affectReview
+);
 // remove review
-router.put("/desaffect-review/:idbook/:idreview", async (req, res) => {
-  try {
-    const book = await Book.findByIdAndUpdate(
-      req.params.idbook,
-      { $pull: { reviews: req.params.idreview } },
-      {
-        new: true,
-      }
-    );
-    res.json(book);
-  } catch (error) {
-    console.log(error);
-    res.status(500).json({ message: "Internal server error!" });
-  }
-});
+router.put(
+  "/desaffect-review/:idbook/:idreview",
+  passport.authenticate("bearer", { session: false }),
+  bookControllers.desaffectReview
+);
 
 module.exports = router;

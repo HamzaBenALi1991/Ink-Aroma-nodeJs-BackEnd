@@ -5,10 +5,12 @@ const bookSchema = mongoose.Schema(
   {
     title: { type: String, required: true, unique: true },
     author: { type: String, required: true },
-    bookCover: String,
-    description: String,
+    bookCover: {type : String , required :false },
+    description: {type : String , required :true },
     reviews: [{ type: mongoose.Schema.Types.ObjectId, ref: "Review" }],
-    BookScore: Number,
+    BookScore: {type : Number , required :false , default : 2.5 },
+    categorie : { type :String  , required : true },
+    user : { type : mongoose.Schema.Types.ObjectId, ref : "Users"}
   },
   { versionKey: false, timestamps: true }
 );

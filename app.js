@@ -3,23 +3,23 @@ const express = require("express");
 const app = express();
 const morgan = require("morgan");
 const bodyparser = require("body-parser");
-const mongoose =require('mongoose')
-// bearer strategie  with passport 
-require('./passport/bearerStrategie')
-// dotenv config 
-require('dotenv').config()
-
-
+const mongoose = require("mongoose");
+const cors = require("cors");
+const path =require("path")
+// bearer strategie  with passport
+require("./passport/bearerStrategie");
+// dotenv config
+require("dotenv").config();
 
 
 // importing routes
 const UserRoutes = require("./Api/routes/user");
-const BookRoutes =require('./Api/routes/book');
-const ReviewRoutes =require('./Api/routes/review')
-const emailRoutes = require('./Api/routes/EmailApi')
+const BookRoutes = require("./Api/routes/book");
+const ReviewRoutes = require("./Api/routes/review");
+const UploadRoutes = require("./Api/routes/fileApi");
+const forgetpass = require("./Api/routes/forgetpasswordApi");
 
-
-// stting up mongoose connect 
+// stting up mongoose connect
 const options = {
   useNewUrlParser: true,
   useUnifiedTopology: true,
@@ -38,41 +38,26 @@ mongoose
 
 // setting up morgan pachage
 app.use(morgan("dev"));
-// making uploads public 
-app.use( "/uploads", express.static("uploads"))
-
 // config bodyparser
 app.use(
   express.json({
     extended: true,
   })
 );
+
 // CORS handlying
-app.use((req, res, next) => {
-  res.header("Access-Control-Allow-Origin", "*");
-  res.header(
-    "Access-Control-Allow-Origin",
-    "OriginnX-requested-With,Content-Type,Accept,Authorization"
-  );
-  if (req.method === "OPTIONS") {
-    res.header(
-      "Access-Control-Allow-Methods",
-      "PUT",
-      "POST",
-      "PATCH",
-      "GET",
-      "DELETE"
-    );
-    return res.status(200).json({});
-  }
-  next();
-});
+app.use(cors());
+
+// making uploads public
+app.use("/uploads", express.static("uploads"));
+app.use("/images", express.static(path.join("images")));
 
 // routes that handls requests
 app.use("/", UserRoutes);
-app.use('/',BookRoutes); 
-app.use('/',ReviewRoutes) ;
-app.use('/users/mail' , emailRoutes)
+app.use("/", BookRoutes);
+app.use("/", ReviewRoutes);
+app.use("/", UploadRoutes);
+app.use("/", forgetpass);
 
 // handlying all wrong routes  :
 

@@ -8,12 +8,12 @@ const { json } = require("body-parser");
 passport.use(
   new BearerStrategy(async (token, done) => {
     try {
-      const decoded = jwt.verify(token, "hamza");
+      const decoded = jwt.verify(token, process.env.JWT_SECRET);
       const user = await User.findById(decoded.Id);
       if (!user) {
         return done(null, false);
       } else {
-        return done(null, user, { scope: "all" });
+        return done(null,user, { scope: "all" });
       }
     } catch (error) {
         console.log(error);
