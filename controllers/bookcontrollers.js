@@ -71,7 +71,7 @@ exports.delete = async (req, res) => {
       );
       const reviewsId = [];
       //remove all books reviews and delete these review.id from user.review
-      if (reviewsId.length > 0) {
+      if (book.reviews.length > 0) {
         for (let i = 0; i < book.reviews.length; i++) {
           reviewsId.push(book.reviews[i]);
         }
@@ -88,10 +88,13 @@ exports.delete = async (req, res) => {
           await Review.findByIdAndRemove(reviewsId[j]);
         }
       }
-      fs.unlinkSync("uploads/books/" + book.bookCover);
+      if (
+        book.bookCover != "http://localhost:3000/uploads/users/download.jpeg"  ) {
+        fs.unlinkSync("uploads/books/" + book.bookCover);
+      }
+
       await Book.findByIdAndRemove(req.params.id);
       res.json({ message: "Book has been been deleted successfully" });
-
     } else {
       res.status(404).json({
         message: "there is no book with this ID so you can delete it .",

@@ -92,25 +92,24 @@ exports.delete = async (req, res) => {
       for (let i = 0; i < user.reviews.length; i++) {
         reviewedId.push(user.reviews[i]);
       }
-      console.log(reviewedId);
-      if (reviewedId.length>0) {
+      if (reviewedId.length > 0) {
         for (let j = 0; j < reviewedId.length; j++) {
-          const review = await Review.findById(reviewedId[j])  ;
-         // remove user.Reviews from book.Reviews
-           await Book.findByIdAndUpdate(
-            review.book ,
+          const review = await Review.findById(reviewedId[j]);
+          // remove user.Reviews from book.Reviews
+          await Book.findByIdAndUpdate(
+            review.book,
             { $pull: { reviews: reviewedId[j] } },
             {
               new: true,
             }
           );
-  
-           await Review.findByIdAndRemove(reviewedId[j]);
-       
-  
+
+          await Review.findByIdAndRemove(reviewedId[j]);
         }
       }
-      fs.unlinkSync("uploads/users/" + user.image);
+      if (user.image != "http://localhost:3000/uploads/users/download.jpeg") {
+        fs.unlinkSync("uploads/users/" + user.image);
+      }
       await User.findByIdAndRemove(req.params.id);
       res.json({ message: "User been deleted successfully" });
     } else {
@@ -167,7 +166,7 @@ exports.update = async (req, res) => {
 // affect a favour book to a user using book Id conroller
 exports.affectFavBook = async (req, res) => {
   try {
-    await User.findByIdAndUpdate(
+  const user =  await User.findByIdAndUpdate(
       req.user.id,
       { $push: { favoritbooks: req.params.idbook } },
       {
@@ -176,6 +175,7 @@ exports.affectFavBook = async (req, res) => {
     );
     res.status(200).json({
       message: "book added successfully to Favorits . ",
+      user : user 
     });
   } catch (error) {
     console.log(error);
@@ -185,8 +185,8 @@ exports.affectFavBook = async (req, res) => {
 // désaffact fav book from user controller
 exports.removeFavBook = async (req, res) => {
   try {
-    await User.findByIdAndUpdate(
-      req.params.iduser,
+    const user = await User.findByIdAndUpdate(
+      req.user.id,
       { $pull: { favoritbooks: req.params.idbook } },
       {
         new: true,
@@ -194,6 +194,7 @@ exports.removeFavBook = async (req, res) => {
     );
     res.status(200).json({
       message: "Book has been removed from you <3 list .  ",
+      user : user 
     });
   } catch (error) {
     console.log(error);
