@@ -89,22 +89,25 @@ exports.delete = async (req, res) => {
     if (user) {
       const reviewedId = [];
       // remove user.Reviews from book.Reviews and delete all user.review
-      for (let i = 0; i < user.reviews.length; i++) {
-        reviewedId.push(user.reviews[i]);
-      }
-      if (reviewedId.length > 0) {
-        for (let j = 0; j < reviewedId.length; j++) {
-          const review = await Review.findById(reviewedId[j]);
-          // remove user.Reviews from book.Reviews
-          await Book.findByIdAndUpdate(
-            review.book,
-            { $pull: { reviews: reviewedId[j] } },
-            {
-              new: true,
-            }
-          );
-
-          await Review.findByIdAndRemove(reviewedId[j]);
+      
+      if (user.reviews) {
+        for (let i = 0; i < user.reviews.length; i++) {
+          reviewedId.push(user.reviews[i]);
+        }
+        if (reviewedId.length > 0) {
+          for (let j = 0; j < reviewedId.length; j++) {
+            const review = await Review.findById(reviewedId[j]);
+            // remove user.Reviews from book.Reviews
+            await Book.findByIdAndUpdate(
+              review.book,
+              { $pull: { reviews: reviewedId[j] } },
+              {
+                new: true,
+              }
+            );
+  
+            await Review.findByIdAndRemove(reviewedId[j]);
+          }
         }
       }
       if (user.image != "http://localhost:3000/uploads/users/download.jpeg") {

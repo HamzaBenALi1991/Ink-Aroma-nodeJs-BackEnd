@@ -4,7 +4,7 @@ const app = express();
 const morgan = require("morgan");
 const bodyparser = require("body-parser");
 const mongoose = require("mongoose");
-const cors = require("cors");
+const cors = require('cors');
 const path =require("path")
 // bearer strategie  with passport
 require("./passport/bearerStrategie");
