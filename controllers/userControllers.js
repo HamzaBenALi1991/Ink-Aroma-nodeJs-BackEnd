@@ -89,7 +89,7 @@ exports.delete = async (req, res) => {
     if (user) {
       const reviewedId = [];
       // remove user.Reviews from book.Reviews and delete all user.review
-      
+
       if (user.reviews) {
         for (let i = 0; i < user.reviews.length; i++) {
           reviewedId.push(user.reviews[i]);
@@ -105,7 +105,7 @@ exports.delete = async (req, res) => {
                 new: true,
               }
             );
-  
+
             await Review.findByIdAndRemove(reviewedId[j]);
           }
         }
@@ -169,7 +169,7 @@ exports.update = async (req, res) => {
 // affect a favour book to a user using book Id conroller
 exports.affectFavBook = async (req, res) => {
   try {
-  const user =  await User.findByIdAndUpdate(
+    const user = await User.findByIdAndUpdate(
       req.user.id,
       { $push: { favoritbooks: req.params.idbook } },
       {
@@ -178,7 +178,7 @@ exports.affectFavBook = async (req, res) => {
     );
     res.status(200).json({
       message: "book added successfully to Favorits . ",
-      user : user 
+      user: user,
     });
   } catch (error) {
     console.log(error);
@@ -197,7 +197,7 @@ exports.removeFavBook = async (req, res) => {
     );
     res.status(200).json({
       message: "Book has been removed from you <3 list .  ",
-      user : user 
+      user: user,
     });
   } catch (error) {
     console.log(error);
