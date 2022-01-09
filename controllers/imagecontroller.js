@@ -1,10 +1,9 @@
 const Book = require("../Api/models/bookSchema");
-const fs =require('fs'); 
-const User =require('../Api/models/userschema')
+const fs = require("fs");
+const User = require("../Api/models/userschema");
 
 exports.upload = async (req, res) => {
   try {
-    console.log(req.file);
     const file = await req.file;
     const olduser = await User.findById(req.params.id);
     if (!file) {
@@ -22,8 +21,7 @@ exports.upload = async (req, res) => {
         {
           new: true,
         }
-      )
-      fs.unlinkSync("uploads/users/" + olduser.image);
+      );
 
       res.status(200).json(user);
     }
@@ -35,7 +33,7 @@ exports.upload = async (req, res) => {
   }
 };
 
-exports.upload2 =  async (req, res) => {
+exports.upload2 = async (req, res) => {
   try {
     const file = await req.file;
     const oldbook = await Book.findById(req.params.id);
@@ -54,8 +52,7 @@ exports.upload2 =  async (req, res) => {
         {
           new: true,
         }
-      )
-      fs.unlinkSync("uploads/books/" + oldbook.bookCover);
+      );
 
       res.status(200).json(book);
     }
@@ -66,4 +63,3 @@ exports.upload2 =  async (req, res) => {
     });
   }
 };
-
