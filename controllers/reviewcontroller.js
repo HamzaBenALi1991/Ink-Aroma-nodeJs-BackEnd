@@ -77,9 +77,6 @@ exports.delete = async (req, res) => {
 // update review controller
 exports.update = async (req, res) => {
   try {
-    const review = await Reviews.findByIdAndUpdate(req.params.id, req.body, {
-      new: true,
-    });
     if (review) {
       // checking if the review already exist or not
       res.json({
